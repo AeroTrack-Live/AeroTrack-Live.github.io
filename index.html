@@ -556,8 +556,9 @@ tbody td{padding:7px 12px;font-size:12px}
               <th data-col="route">ROUTE</th>
               <th data-col="status">STATUS</th>
               <th data-col="altitude" class="hidden-sm">ALT (ft)</th>
-              <th data-col="speed" class="hidden-sm">KM/H</th>
+              <th data-col="speed" class="hidden-sm">SPD</th>
               <th data-col="heading" class="hidden-md">HDG</th>
+              <th data-col="country" class="hidden-md">ORIGIN</th>
               <th data-col="updated" class="hidden-md">UPDATED</th>
             </tr>
           </thead>
@@ -630,6 +631,9 @@ const REFRESH_SEC = 15;
 // Max trail history per aircraft
 const MAX_TRAIL = 12;
 
+// Max search results to display
+const MAX_SEARCH_RESULTS = 12;
+
 // ==========================================
 // STATE
 // ==========================================
@@ -689,20 +693,110 @@ const G = {
 
 // Known airline ICAO prefixes -> name mapping (common ones)
 const ICAO_AIRLINE = {
+  // North America — Major & National
   'AAL':'American Airlines','UAL':'United Airlines','DAL':'Delta Air Lines',
-  'SWA':'Southwest Airlines','BAW':'British Airways','DLH':'Lufthansa',
-  'AFR':'Air France','KLM':'KLM','UAE':'Emirates','QTR':'Qatar Airways',
-  'SIA':'Singapore Airlines','CPA':'Cathay Pacific','THA':'Thai Airways',
-  'JAL':'Japan Airlines','ANA':'All Nippon','ETH':'Ethiopian','QFA':'Qantas',
-  'TK':'Turkish Airlines','THY':'Turkish Airlines','EZY':'easyJet',
-  'RYR':'Ryanair','VIR':'Virgin Atlantic','IBE':'Iberia','TAP':'TAP Air Portugal',
-  'SAS':'Scandinavian','FIN':'Finnair','AUA':'Austrian','SWR':'Swiss Int.',
-  'ELY':'El Al','MSR':'EgyptAir','SVA':'Saudia','GFA':'Gulf Air',
-  'PIA':'Pakistan Int.','AIC':'Air India','TGW':'Scoot','JST':'Jetstar',
+  'SWA':'Southwest Airlines','NKS':'Spirit Airlines','AAY':'Allegiant Air',
+  'FFT':'Frontier Airlines','JBU':'JetBlue Airways','HAL':'Hawaiian Airlines',
+  'ASA':'Alaska Airlines','WJA':'WestJet','ACA':'Air Canada',
+  'TSC':'Air Transat','WEN':'WestJet Encore','POE':'Porter Airlines',
+  'FLE':'Flair Airlines','VOI':'Volaris','AMX':'Aeromexico',
+  'VIV':'VivaAerobus','CMP':'Copa Airlines',
+  // North America — Regional & Cargo
+  'SKW':'SkyWest Airlines','RPA':'Republic Airways','ENY':'Envoy Air',
+  'GJS':'GoJet Airlines','PCM':'Mesa Airlines','JIA':'PSA Airlines',
+  'CPZ':'Compass Airlines','AJI':'Amerijet','ATN':'Air Transport Int.',
+  'GTI':'Atlas Air','FDX':'FedEx Express','UPS':'UPS Airlines',
+  'ABX':'ABX Air','KFS':'Kalitta Air','PAC':'Polar Air Cargo',
+  // Europe — Major & Flag Carriers
+  'BAW':'British Airways','DLH':'Lufthansa','AFR':'Air France',
+  'KLM':'KLM Royal Dutch','IBE':'Iberia','TAP':'TAP Air Portugal',
+  'SAS':'Scandinavian Airlines','FIN':'Finnair','AUA':'Austrian Airlines',
+  'SWR':'Swiss International','VIR':'Virgin Atlantic','LOT':'LOT Polish',
+  'CSA':'Czech Airlines','THY':'Turkish Airlines','AEE':'Aegean Airlines',
+  'TAR':'TAROM','BEL':'Brussels Airlines','IBS':'Iberia Express',
+  'ICE':'Icelandair','AZA':'ITA Airways',
+  'EIN':'Aer Lingus','AEA':'Air Europa','LGL':'Luxair',
+  'BMA':'Blue Air','SUS':'Sun Country','TRA':'Transavia',
+  'VOE':'Volotea','BCS':'European Air Charter',
+  // Europe — Low-Cost
+  'EZY':'easyJet','RYR':'Ryanair','WZZ':'Wizz Air',
+  'EJU':'easyJet Europe','EZS':'easyJet Switzerland','RUK':'Ryanair UK',
+  'NLY':'Edelweiss Air','BER':'Norse Atlantic','DJT':'Jet2',
+  'TVS':'SmartWings','NOZ':'Norwegian Air Shuttle','NOS':'Norwegian Air Sweden',
+  'VLG':'Vueling','HFY':'Fly Play','TOM':'TUI Airways',
+  'TUI':'TUI fly Deutschland','JAF':'TUI fly Netherlands','TFL':'TUI fly Belgium',
+  'CFG':'Condor','SXS':'SunExpress','AHY':'Azerbaijan Airlines',
+  'CLH':'Lufthansa CityLine','EWG':'Eurowings',
+  // Middle East & Central Asia
+  'UAE':'Emirates','QTR':'Qatar Airways','ETD':'Etihad Airways',
+  'SVA':'Saudia','GFA':'Gulf Air','OMA':'Oman Air',
+  'KAC':'Kuwait Airways','MEA':'Middle East Airlines','RJA':'Royal Jordanian',
+  'FDB':'flydubai','AXB':'Air Arabia','ABY':'Air Arabia Abu Dhabi',
+  'IAW':'Iraqi Airways','IRA':'Iran Air','MSC':'Air Cairo',
+  'MSR':'EgyptAir','NIA':'Nile Air','ELY':'El Al Israel',
+  'THD':'Jazeera Airways','FJA':'FlyJinnah','SYR':'Syrianair',
+  // Africa
+  'ETH':'Ethiopian Airlines','SAA':'South African Airways',
+  'RAM':'Royal Air Maroc','TUN':'Tunisair','KQA':'Kenya Airways',
+  'NGL':'Nigeria Air','AWA':'Africa World Airlines','MNO':'Mango Airlines',
+  'DAH':'Air Algerie','LAM':'LAM Mozambique','RWD':'RwandAir',
+  'SWT':'SWIFT Air','UGA':'Uganda Airlines','ZNR':'Aero Zambia',
+  'MWI':'Malawian Airlines','NMB':'Air Namibia','BFC':'Badr Airlines',
+  'TAA':'TACA','MDE':'Air Madagascar','CAW':'Comair',
+  // South & Central Asia
+  'AIC':'Air India','IGO':'IndiGo','SEJ':'SpiceJet',
+  'AXX':'Air India Express','ALK':'SriLankan Airlines',
+  'UBD':'Biman Bangladesh','PIA':'Pakistan Int. Airlines',
+  'BLV':'Bellview Airlines','GBA':'Go First',
+  'APJ':'Peach Aviation','RAH':'Air Austral','FMA':'Flyme Maldives',
+  // East Asia
   'CCA':'Air China','CSN':'China Southern','CES':'China Eastern',
-  'KAL':'Korean Air','AAR':'Asiana','VJC':'VietJet','MAS':'Malaysia Airlines',
-  'GAR':'Garuda','WZZ':'Wizz Air','NKS':'Spirit','AAY':'Allegiant',
-  'SKW':'SkyWest','PCM':'Mesa','ENY':'Envoy','GJS':'GoJet',
+  'CHH':'Hainan Airlines','CXA':'Xiamen Airlines','CSC':'Sichuan Airlines',
+  'CDG':'Shandong Airlines','CSZ':'Shenzhen Airlines','DKH':'Juneyao Airlines',
+  'CQH':'Spring Airlines','GCR':'Tianjin Airlines','HXA':'Hong Kong Airlines',
+  'JAL':'Japan Airlines','ANA':'All Nippon Airways','JJP':'Jetstar Japan',
+  'ADO':'Air Do','SNJ':'Solaseed Air','SFJ':'StarFlyer',
+  'KAL':'Korean Air','AAR':'Asiana Airlines','JNA':'Jin Air',
+  'TWB':'T\'way Air','ABL':'Air Busan','ESR':'Eastar Jet',
+  'EVA':'EVA Air','CAL':'China Airlines','TTW':'Tigerair Taiwan',
+  'SRK':'Skymark Airlines',
+  // Southeast Asia
+  'SIA':'Singapore Airlines','TGW':'Scoot','MAS':'Malaysia Airlines',
+  'AXM':'AirAsia','XAX':'AirAsia X','CPA':'Cathay Pacific',
+  'HVN':'Vietnam Airlines','VJC':'VietJet Air','BIC':'Pacific Airlines',
+  'THA':'Thai Airways','AIQ':'Thai AirAsia','NOK':'Nok Air',
+  'GAR':'Garuda Indonesia','LNI':'Lion Air','BTK':'Batik Air',
+  'CEB':'Cebu Pacific','PAL':'Philippine Airlines','APG':'AirAsia Philippines',
+  'JST':'Jetstar Airways','ANZ':'Air New Zealand','RBA':'Royal Brunei',
+  'SLK':'Silk Air','MYA':'Myanmar Airways','UBP':'Lao Airlines',
+  // Oceania
+  'QFA':'Qantas','VOZ':'Virgin Australia','TGG':'Tigerair Australia',
+  'REX':'Regional Express','QJE':'Qantas Link','NZM':'Mount Cook Airline',
+  'FJI':'Fiji Airways','SAM':'Samoa Airways',
+  // South America
+  'LAN':'LATAM Chile','TAM':'LATAM Brazil','ONE':'LATAM Colombia',
+  'GLO':'GOL Linhas Aereas','AZU':'Azul Brazilian','ARG':'Aerolineas Argentinas',
+  'AVA':'Avianca','SKU':'Sky Airline','BOV':'Boliviana de Aviacion',
+  'LAP':'LATAM Paraguay','ARE':'Aires Colombia','PBN':'PBA Air',
+  'JBZ':'JetSMART','LAW':'LATAM Peru','EAL':'Copa Colombia',
+  // Russia & CIS
+  'AFL':'Aeroflot','SBI':'S7 Airlines','SVR':'Ural Airlines',
+  'SDM':'Rossiya','UTN':'UTair',
+  'BRU':'Belavia','KZR':'Air Astana','HYA':'FlyArystan',
+  'UZB':'Uzbekistan Airways','TJK':'Tajik Air','AZQ':'Silk Way Airlines',
+  // Cargo Airlines
+  'CLX':'Cargolux','AHK':'Air Hong Kong','BOX':'AeroLogic',
+  'GEC':'Lufthansa Cargo','MPH':'Martinair Cargo','SQC':'Singapore Airlines Cargo',
+  'CKK':'China Cargo Airlines','NCA':'Nippon Cargo',
+  'CAO':'Air China Cargo','ABD':'Air Atlanta Icelandic',
+  'ETF':'Ethiopian Cargo','TPA':'TAMPA Cargo','GSS':'Global Supply Systems',
+  // Additional Worldwide
+  'WIF':'Wideroe','BEE':'Flybe','LNK':'Link Airways',
+  'LOG':'Loganair','ANE':'Air Nostrum','HOP':'HOP!',
+  'DNM':'Denim Air','CJT':'Cargojet','BPA':'Blue Panorama',
+  'PGT':'Pegasus Airlines','OHY':'Onur Air','FHY':'Freebird Airlines',
+  'MAC':'Mahan Air','QNZ':'Qanot Sharq','KIS':'Contact Air',
+  'FWI':'French Bee','BGA':'Airbus Transport','RCH':'US Air Force',
 };
 
 // Country flag emoji from country code
@@ -717,38 +811,100 @@ const COUNTRY_FLAGS = {
   'New Zealand':'🇳🇿','South Africa':'🇿🇦','Egypt':'🇪🇬','Israel':'🇮🇱',
   'Pakistan':'🇵🇰','Malaysia':'🇲🇾','Indonesia':'🇮🇩','Vietnam':'🇻🇳',
   'Philippines':'🇵🇭','Mexico':'🇲🇽','Argentina':'🇦🇷','Chile':'🇨🇱',
-  'Colombia':'🇨🇴','Poland':'🇵🇱','Czech Republic':'🇨🇿','Hungary':'🇭🇺',
+  'Colombia':'🇨🇴','Poland':'🇵🇱','Czech Republic':'🇨🇿','Czechia':'🇨🇿','Hungary':'🇭🇺',
   'Romania':'🇷🇴','Ukraine':'🇺🇦','Greece':'🇬🇷','Hong Kong':'🇭🇰',
   'Taiwan':'🇹🇼','Saudi Arabia':'🇸🇦','Kuwait':'🇰🇼','Bahrain':'🇧🇭',
+  'Oman':'🇴🇲','Jordan':'🇯🇴','Lebanon':'🇱🇧','Iraq':'🇮🇶','Iran':'🇮🇷',
+  'Morocco':'🇲🇦','Tunisia':'🇹🇳','Algeria':'🇩🇿','Libya':'🇱🇾',
+  'Nigeria':'🇳🇬','Ghana':'🇬🇭','Kenya':'🇰🇪','Ethiopia':'🇪🇹','Tanzania':'🇹🇿',
+  'Uganda':'🇺🇬','Rwanda':'🇷🇼','Mozambique':'🇲🇿','Madagascar':'🇲🇬',
+  'Mauritius':'🇲🇺','Senegal':'🇸🇳','Ivory Coast':'🇨🇮','Cameroon':'🇨🇲',
+  'Peru':'🇵🇪','Ecuador':'🇪🇨','Venezuela':'🇻🇪','Bolivia':'🇧🇴',
+  'Paraguay':'🇵🇾','Uruguay':'🇺🇾','Panama':'🇵🇦','Costa Rica':'🇨🇷',
+  'Guatemala':'🇬🇹','Honduras':'🇭🇳','El Salvador':'🇸🇻','Nicaragua':'🇳🇮',
+  'Cuba':'🇨🇺','Dominican Republic':'🇩🇴','Jamaica':'🇯🇲','Trinidad and Tobago':'🇹🇹',
+  'Bahamas':'🇧🇸','Barbados':'🇧🇧','Puerto Rico':'🇵🇷',
+  'Iceland':'🇮🇸','Luxembourg':'🇱🇺','Belgium':'🇧🇪','Malta':'🇲🇹','Cyprus':'🇨🇾',
+  'Croatia':'🇭🇷','Serbia':'🇷🇸','Bulgaria':'🇧🇬','Slovakia':'🇸🇰','Slovenia':'🇸🇮',
+  'Bosnia and Herzegovina':'🇧🇦','North Macedonia':'🇲🇰','Albania':'🇦🇱','Montenegro':'🇲🇪',
+  'Moldova':'🇲🇩','Lithuania':'🇱🇹','Latvia':'🇱🇻','Estonia':'🇪🇪','Belarus':'🇧🇾',
+  'Georgia':'🇬🇪','Armenia':'🇦🇲','Azerbaijan':'🇦🇿','Kazakhstan':'🇰🇿',
+  'Uzbekistan':'🇺🇿','Turkmenistan':'🇹🇲','Tajikistan':'🇹🇯','Kyrgyzstan':'🇰🇬',
+  'Mongolia':'🇲🇳','Myanmar':'🇲🇲','Cambodia':'🇰🇭','Laos':'🇱🇦',
+  'Sri Lanka':'🇱🇰','Bangladesh':'🇧🇩','Nepal':'🇳🇵','Maldives':'🇲🇻',
+  'Brunei':'🇧🇳','Fiji':'🇫🇯','Papua New Guinea':'🇵🇬',
+  'Afghanistan':'🇦🇫','Yemen':'🇾🇪','Syria':'🇸🇾',
+  'Scotland':'🏴󠁧󠁢󠁳󠁣󠁴󠁿','Wales':'🏴󠁧󠁢󠁷󠁬󠁳󠁿',
+  'Macau':'🇲🇴','Bermuda':'🇧🇲','Cayman Islands':'🇰🇾',
+};
+
+// Haversine distance in km between two lat/lng points
+function haversineKm(lat1, lon1, lat2, lon2) {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon/2) * Math.sin(dLon/2);
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+// Convert distance to nautical miles
+function kmToNm(km) { return km * 0.539957; }
+
+// Estimate Mach number based on speed and altitude
+function estimateMach(speedKmh, altFt) {
+  // ISA lapse rate: temp decreases 6.5°C per 1000m up to tropopause (~36,089 ft)
+  const altM = altFt * 0.3048;
+  const tempC = altFt <= 36089
+    ? 15 - (altM * 6.5 / 1000)     // Troposphere
+    : -56.5;                         // Stratosphere (constant at tropopause)
+  const speedOfSound = 331.3 * Math.sqrt(1 + tempC / 273.15) * 3.6; // km/h
+  return speedKmh / speedOfSound;
+}
+
+// Squawk code interpretations
+const SQUAWK_CODES = {
+  '7500': { text: 'HIJACK', color: 'var(--red)', icon: '🚨' },
+  '7600': { text: 'RADIO FAILURE', color: 'var(--amber)', icon: '📡' },
+  '7700': { text: 'EMERGENCY', color: 'var(--red)', icon: '🆘' },
+  '7777': { text: 'MILITARY INTERCEPT', color: 'var(--red)', icon: '⚠' },
+  '1200': { text: 'VFR', color: 'var(--text3)', icon: '' },
+  '2000': { text: 'OCEANIC', color: 'var(--text3)', icon: '' },
 };
 
 async function fetchOpenSky() {
-  // OpenSky Network state vectors
-  // Returns all aircraft with ADS-B positions right now
   const url = `${OPENSKY_BASE}/states/all`;
-  
-  const res = await fetch(url, {
-    headers: { 'Accept': 'application/json' },
-    signal: AbortSignal.timeout(10000)
-  });
-  
-  if (!res.ok) throw new Error(`OpenSky HTTP ${res.status}`);
-  const json = await res.json();
-  
-  if (!json.states || !Array.isArray(json.states)) return [];
-  
+
+  // Retry up to 3 times with exponential backoff
+  let lastErr;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      const res = await fetch(url, {
+        headers: { 'Accept': 'application/json' },
+        signal: AbortSignal.timeout(15000)
+      });
+      if (!res.ok) throw new Error(`OpenSky HTTP ${res.status}`);
+      const json = await res.json();
+      if (!json.states || !Array.isArray(json.states)) return [];
+
+      return json.states
+        .filter(s => s[5] != null && s[6] != null)
+        .map(s => parseOpenSkyState(s));
+    } catch(e) {
+      lastErr = e;
+      if (attempt < 2) await sleep(1000 * Math.pow(2, attempt));
+    }
+  }
+  throw lastErr;
+}
+
+function parseOpenSkyState(s) {
   // OpenSky state vector fields:
   // [0] icao24, [1] callsign, [2] origin_country, [3] time_position,
   // [4] last_contact, [5] longitude, [6] latitude, [7] baro_altitude,
   // [8] on_ground, [9] velocity, [10] true_track, [11] vertical_rate,
   // [12] sensors, [13] geo_altitude, [14] squawk, [15] spi, [16] position_source
-  
-  return json.states
-    .filter(s => s[5] != null && s[6] != null) // must have position
-    .map(s => parseOpenSkyState(s));
-}
-
-function parseOpenSkyState(s) {
   const icao = (s[0] || '').toLowerCase().trim();
   const callsign = (s[1] || '').trim();
   const country = s[2] || '';
@@ -761,12 +917,16 @@ function parseOpenSkyState(s) {
   const vRate = s[11]; // m/s
   const geoAlt = s[13]; // meters
   const squawk = s[14] || '';
+  const spi = s[15] || false; // Special Position Indicator
+  const posSource = s[16]; // 0=ADS-B, 1=ASTERIX, 2=MLAT, 3=FLARM
   const lastContact = s[4];
+  const timePosition = s[3];
   
   // Convert units
   const altFt = baroAlt != null ? Math.round(baroAlt * 3.28084) : 0;
   const altGeoFt = geoAlt != null ? Math.round(geoAlt * 3.28084) : altFt;
   const speedKmh = velocity != null ? Math.round(velocity * 3.6) : 0;
+  const speedKts = velocity != null ? Math.round(velocity * 1.94384) : 0;
   const vRateFpm = vRate != null ? Math.round(vRate * 196.85) : 0;
   
   // Guess airline from callsign prefix
@@ -774,6 +934,10 @@ function parseOpenSkyState(s) {
   const prefix2 = callsign.substring(0, 2).toUpperCase();
   const airline = ICAO_AIRLINE[prefix3] || ICAO_AIRLINE[prefix2] || country || 'Unknown';
   const flag = COUNTRY_FLAGS[country] || '';
+  
+  // Position source label
+  const POS_SOURCES = ['ADS-B','ASTERIX','MLAT','FLARM'];
+  const posSourceLabel = POS_SOURCES[posSource] || 'Unknown';
   
   // Determine status
   let status = 'active';
@@ -803,11 +967,15 @@ function parseOpenSkyState(s) {
     _altFt: altFt,
     _altGeoFt: altGeoFt,
     _speedKmh: speedKmh,
+    _speedKts: speedKts,
     _heading: track || 0,
     _vRateFpm: vRateFpm,
     _isGround: onGround,
     _squawk: squawk,
+    _spi: spi,
+    _posSource: posSourceLabel,
     _lastContact: lastContact,
+    _timePosition: timePosition,
     _status: status,
     // Enriched fields (filled async)
     _dep: null,
@@ -817,7 +985,7 @@ function parseOpenSkyState(s) {
     _aircraft: null,
     _flightNum: callsign,
     _enriched: false,
-    _progress: Math.random() * 0.8 + 0.1, // placeholder until enriched
+    _progress: Math.random() * 0.8 + 0.1,
     _depTime: null,
     _arrTime: null,
     _depLat: null, _depLng: null,
@@ -921,26 +1089,98 @@ function applyEnrichment(callsign) {
 
 // Common airport coordinates for projection
 const AIRPORT_COORDS = {
-  'JFK':{lat:40.6413,lng:-73.7781},'LAX':{lat:33.9425,lng:-118.4081},'LHR':{lat:51.4700,lng:-0.4543},
-  'CDG':{lat:49.0097,lng:2.5479},'DXB':{lat:25.2532,lng:55.3657},'SIN':{lat:1.3644,lng:103.9915},
-  'ORD':{lat:41.9742,lng:-87.9073},'ATL':{lat:33.6407,lng:-84.4277},'FRA':{lat:50.0379,lng:8.5622},
-  'AMS':{lat:52.3086,lng:4.7639},'HKG':{lat:22.3080,lng:113.9185},'NRT':{lat:35.7647,lng:140.3864},
-  'ICN':{lat:37.4602,lng:126.4407},'SYD':{lat:-33.9399,lng:151.1753},'GRU':{lat:-23.4356,lng:-46.4731},
-  'YYZ':{lat:43.6777,lng:-79.6248},'MIA':{lat:25.7959,lng:-80.2870},'SFO':{lat:37.6213,lng:-122.3790},
-  'BKK':{lat:13.6811,lng:100.7472},'KUL':{lat:2.7456,lng:101.7099},'DEL':{lat:28.5665,lng:77.1031},
-  'BOM':{lat:19.0896,lng:72.8656},'DOH':{lat:25.2609,lng:51.6138},'AUH':{lat:24.4330,lng:54.6511},
-  'IST':{lat:41.2753,lng:28.7519},'MAD':{lat:40.4983,lng:-3.5676},'BCN':{lat:41.2974,lng:2.0833},
-  'FCO':{lat:41.8003,lng:12.2389},'MUC':{lat:48.3537,lng:11.7750},'ZRH':{lat:47.4647,lng:8.5492},
+  // North America
+  'JFK':{lat:40.6413,lng:-73.7781},'LAX':{lat:33.9425,lng:-118.4081},'ORD':{lat:41.9742,lng:-87.9073},
+  'ATL':{lat:33.6407,lng:-84.4277},'DFW':{lat:32.8998,lng:-97.0403},'DEN':{lat:39.8561,lng:-104.6737},
+  'SFO':{lat:37.6213,lng:-122.3790},'SEA':{lat:47.4502,lng:-122.3088},'MIA':{lat:25.7959,lng:-80.2870},
+  'BOS':{lat:42.3656,lng:-71.0096},'EWR':{lat:40.6895,lng:-74.1745},'LGA':{lat:40.7772,lng:-73.8726},
+  'IAH':{lat:29.9844,lng:-95.3414},'MSP':{lat:44.8848,lng:-93.2223},'DTW':{lat:42.2124,lng:-83.3534},
+  'PHX':{lat:33.4373,lng:-112.0078},'CLT':{lat:35.2140,lng:-80.9431},'LAS':{lat:36.0840,lng:-115.1537},
+  'MCO':{lat:28.4294,lng:-81.3090},'IAD':{lat:38.9531,lng:-77.4565},'DCA':{lat:38.8512,lng:-77.0402},
+  'PHL':{lat:39.8721,lng:-75.2411},'BWI':{lat:39.1754,lng:-76.6684},'SLC':{lat:40.7884,lng:-111.9778},
+  'SAN':{lat:32.7336,lng:-117.1897},'TPA':{lat:27.9755,lng:-82.5332},'PDX':{lat:45.5898,lng:-122.5951},
+  'STL':{lat:38.7487,lng:-90.3700},'BNA':{lat:36.1263,lng:-86.6774},'AUS':{lat:30.1975,lng:-97.6664},
+  'RDU':{lat:35.8801,lng:-78.7880},'MCI':{lat:39.2976,lng:-94.7139},'HNL':{lat:21.3187,lng:-157.9224},
+  'OGG':{lat:20.8986,lng:-156.4305},'ANC':{lat:61.1743,lng:-149.9982},'YYZ':{lat:43.6777,lng:-79.6248},
+  'YVR':{lat:49.1947,lng:-123.1792},'YUL':{lat:45.4706,lng:-73.7408},'YYC':{lat:51.1215,lng:-114.0076},
+  'YOW':{lat:45.3225,lng:-75.6692},'YEG':{lat:53.3097,lng:-113.5797},'YHZ':{lat:44.8808,lng:-63.5085},
+  'MEX':{lat:19.4363,lng:-99.0721},'CUN':{lat:21.0365,lng:-86.8771},'GDL':{lat:20.5218,lng:-103.3113},
+  'PTY':{lat:9.0714,lng:-79.3835},'SJO':{lat:9.9939,lng:-84.2088},'SAL':{lat:13.4409,lng:-89.0557},
+  // Europe
+  'LHR':{lat:51.4700,lng:-0.4543},'LGW':{lat:51.1537,lng:-0.1821},'STN':{lat:51.8860,lng:0.2389},
+  'LTN':{lat:51.8747,lng:-0.3683},'MAN':{lat:53.3537,lng:-2.2750},'EDI':{lat:55.9500,lng:-3.3725},
+  'CDG':{lat:49.0097,lng:2.5479},'ORY':{lat:48.7233,lng:2.3794},'NCE':{lat:43.6584,lng:7.2159},
+  'LYS':{lat:45.7256,lng:5.0811},'MRS':{lat:43.4393,lng:5.2214},
+  'FRA':{lat:50.0379,lng:8.5622},'MUC':{lat:48.3537,lng:11.7750},'BER':{lat:52.3667,lng:13.5033},
+  'DUS':{lat:51.2895,lng:6.7668},'HAM':{lat:53.6304,lng:9.9882},'CGN':{lat:50.8659,lng:7.1427},
+  'AMS':{lat:52.3086,lng:4.7639},'MAD':{lat:40.4983,lng:-3.5676},'BCN':{lat:41.2974,lng:2.0833},
+  'PMI':{lat:39.5517,lng:2.7388},'AGP':{lat:36.6749,lng:-4.4991},'VLC':{lat:39.4893,lng:-0.4816},
+  'FCO':{lat:41.8003,lng:12.2389},'MXP':{lat:45.6306,lng:8.7281},'VCE':{lat:45.5053,lng:12.3519},
+  'NAP':{lat:40.8860,lng:14.2908},'ZRH':{lat:47.4647,lng:8.5492},'GVA':{lat:46.2381,lng:6.1090},
   'VIE':{lat:48.1102,lng:16.5697},'BRU':{lat:50.9010,lng:4.4844},'LIS':{lat:38.7742,lng:-9.1342},
-  'CPH':{lat:55.6180,lng:12.6508},'ARN':{lat:59.6498,lng:17.9238},'OSL':{lat:60.1939,lng:11.1004},
-  'HEL':{lat:60.3183,lng:24.9630},'DUB':{lat:53.4213,lng:-6.2701},'GVA':{lat:46.2381,lng:6.1090},
-  'MEX':{lat:19.4363,lng:-99.0721},'BOG':{lat:4.7016,lng:-74.1469},'SCL':{lat:-33.3930,lng:-70.7858},
-  'EZE':{lat:-34.8222,lng:-58.5358},'LIM':{lat:-12.0219,lng:-77.1143},'JNB':{lat:-26.1367,lng:28.2411},
-  'CAI':{lat:30.1219,lng:31.4056},'NBO':{lat:-1.3192,lng:36.9275},'CPT':{lat:-33.9715,lng:18.6021},
-  'PVG':{lat:31.1443,lng:121.8083},'PEK':{lat:40.0799,lng:116.6031},'CAN':{lat:23.3925,lng:113.2988},
-  'CTU':{lat:30.5785,lng:103.9471},'SZX':{lat:22.6393,lng:113.8107},'SHA':{lat:31.1981,lng:121.3364},
-  'MNL':{lat:14.5086,lng:121.0194},'CGK':{lat:-6.1275,lng:106.6537},'SGN':{lat:10.8188,lng:106.6520},
-  'HAN':{lat:21.2212,lng:105.8072},'BKI':{lat:5.9372,lng:116.0501},
+  'OPO':{lat:41.2481,lng:-8.6814},'CPH':{lat:55.6180,lng:12.6508},'ARN':{lat:59.6498,lng:17.9238},
+  'OSL':{lat:60.1939,lng:11.1004},'HEL':{lat:60.3183,lng:24.9630},'DUB':{lat:53.4213,lng:-6.2701},
+  'ATH':{lat:37.9364,lng:23.9445},'WAW':{lat:52.1657,lng:20.9671},'PRG':{lat:50.1008,lng:14.2600},
+  'BUD':{lat:47.4369,lng:19.2556},'OTP':{lat:44.5711,lng:26.0850},'SOF':{lat:42.6952,lng:23.4062},
+  'BEG':{lat:44.8184,lng:20.3091},'ZAG':{lat:45.7429,lng:16.0688},'KIV':{lat:46.9277,lng:28.9313},
+  'RIX':{lat:56.9236,lng:23.9711},'TLL':{lat:59.4133,lng:24.8328},'VNO':{lat:54.6341,lng:25.2858},
+  'IST':{lat:41.2753,lng:28.7519},'SAW':{lat:40.8986,lng:29.3092},'AYT':{lat:36.8987,lng:30.8005},
+  'ESB':{lat:40.1281,lng:32.9951},'ADB':{lat:38.2924,lng:27.1570},
+  'KEF':{lat:63.9850,lng:-22.6056},'BGO':{lat:60.2934,lng:5.2181},
+  // Middle East
+  'DXB':{lat:25.2532,lng:55.3657},'AUH':{lat:24.4330,lng:54.6511},'DOH':{lat:25.2609,lng:51.6138},
+  'RUH':{lat:24.9578,lng:46.6989},'JED':{lat:21.6796,lng:39.1565},'BAH':{lat:26.2708,lng:50.6336},
+  'KWI':{lat:29.2267,lng:47.9689},'MCT':{lat:23.5933,lng:58.2844},'AMM':{lat:31.7226,lng:35.9932},
+  'BEY':{lat:33.8209,lng:35.4884},'TLV':{lat:32.0114,lng:34.8867},
+  'IKA':{lat:35.4161,lng:51.1522},'THR':{lat:35.6895,lng:51.3134},
+  // Asia Pacific
+  'SIN':{lat:1.3644,lng:103.9915},'HKG':{lat:22.3080,lng:113.9185},'NRT':{lat:35.7647,lng:140.3864},
+  'HND':{lat:35.5494,lng:139.7798},'KIX':{lat:34.4347,lng:135.2440},'CTS':{lat:42.7752,lng:141.6925},
+  'ICN':{lat:37.4602,lng:126.4407},'GMP':{lat:37.5583,lng:126.7906},'PUS':{lat:35.1796,lng:128.9382},
+  'SYD':{lat:-33.9399,lng:151.1753},'MEL':{lat:-37.6733,lng:144.8433},'BNE':{lat:-27.3842,lng:153.1175},
+  'PER':{lat:-31.9403,lng:115.9672},'ADL':{lat:-34.9450,lng:138.5306},'AKL':{lat:-37.0082,lng:174.7850},
+  'CHC':{lat:-43.4894,lng:172.5323},'WLG':{lat:-41.3272,lng:174.8053},
+  'BKK':{lat:13.6811,lng:100.7472},'DMK':{lat:13.9126,lng:100.6068},'CNX':{lat:18.7669,lng:98.9626},
+  'HKT':{lat:8.1132,lng:98.3169},'KUL':{lat:2.7456,lng:101.7099},'PEN':{lat:5.2972,lng:100.2769},
+  'DEL':{lat:28.5665,lng:77.1031},'BOM':{lat:19.0896,lng:72.8656},'BLR':{lat:13.1979,lng:77.7063},
+  'MAA':{lat:12.9941,lng:80.1709},'CCU':{lat:22.6547,lng:88.4467},'HYD':{lat:17.2403,lng:78.4294},
+  'COK':{lat:10.1520,lng:76.3912},'GOI':{lat:15.3809,lng:73.8314},
+  'MNL':{lat:14.5086,lng:121.0194},'CEB':{lat:10.3075,lng:123.9794},
+  'CGK':{lat:-6.1275,lng:106.6537},'DPS':{lat:-8.7482,lng:115.1672},'SUB':{lat:-7.3798,lng:112.7868},
+  'SGN':{lat:10.8188,lng:106.6520},'HAN':{lat:21.2212,lng:105.8072},'DAD':{lat:16.0439,lng:108.1990},
+  'BKI':{lat:5.9372,lng:116.0501},'RGN':{lat:16.9073,lng:96.1332},'PNH':{lat:11.5466,lng:104.8441},
+  'VTE':{lat:17.9883,lng:102.5633},'CMB':{lat:7.1808,lng:79.8841},
+  'KTM':{lat:27.6966,lng:85.3591},'DAC':{lat:23.8433,lng:90.3978},'ISB':{lat:33.6161,lng:72.8296},
+  'LHE':{lat:31.5216,lng:74.4036},'KHI':{lat:24.9065,lng:67.1609},
+  // China
+  'PVG':{lat:31.1443,lng:121.8083},'PEK':{lat:40.0799,lng:116.6031},'PKX':{lat:39.5098,lng:116.4105},
+  'CAN':{lat:23.3925,lng:113.2988},'CTU':{lat:30.5785,lng:103.9471},'SZX':{lat:22.6393,lng:113.8107},
+  'SHA':{lat:31.1981,lng:121.3364},'KMG':{lat:24.9924,lng:102.7432},'XIY':{lat:34.4471,lng:108.7516},
+  'CKG':{lat:29.7192,lng:106.6422},'HGH':{lat:30.2295,lng:120.4344},'WUH':{lat:30.7838,lng:114.2081},
+  'NKG':{lat:31.7420,lng:118.8620},'TAO':{lat:36.2661,lng:120.3744},'CSX':{lat:28.1892,lng:113.2200},
+  'TSN':{lat:39.1244,lng:117.3462},'DLC':{lat:38.9657,lng:121.5386},'XMN':{lat:24.5440,lng:118.1277},
+  // Africa
+  'JNB':{lat:-26.1367,lng:28.2411},'CPT':{lat:-33.9715,lng:18.6021},'DUR':{lat:-29.6144,lng:31.1197},
+  'CAI':{lat:30.1219,lng:31.4056},'HRG':{lat:27.1784,lng:33.7994},'SSH':{lat:27.9773,lng:34.3925},
+  'NBO':{lat:-1.3192,lng:36.9275},'MBA':{lat:-4.0348,lng:39.5942},'ADD':{lat:8.9779,lng:38.7993},
+  'LOS':{lat:6.5774,lng:3.3211},'ABV':{lat:9.0065,lng:7.2632},'ACC':{lat:5.6052,lng:-0.1668},
+  'DSS':{lat:14.7397,lng:-17.4902},'CMN':{lat:33.3675,lng:-7.5898},'RAK':{lat:31.6069,lng:-8.0363},
+  'TUN':{lat:36.8510,lng:10.2272},'ALG':{lat:36.6910,lng:3.2154},'DAR':{lat:-6.8781,lng:39.2026},
+  'EBB':{lat:0.0424,lng:32.4435},'KGL':{lat:-1.9686,lng:30.1395},'MRU':{lat:-20.4302,lng:57.6836},
+  'TNR':{lat:-18.7969,lng:47.4788},'MPM':{lat:-26.0408,lng:32.5727},
+  // South America
+  'GRU':{lat:-23.4356,lng:-46.4731},'GIG':{lat:-22.8100,lng:-43.2505},'BSB':{lat:-15.8711,lng:-47.9186},
+  'CNF':{lat:-19.6244,lng:-43.9719},'SSA':{lat:-12.9086,lng:-38.3225},'REC':{lat:-8.1265,lng:-34.9236},
+  'FOR':{lat:-3.7763,lng:-38.5326},'POA':{lat:-29.9944,lng:-51.1714},'CWB':{lat:-25.5285,lng:-49.1758},
+  'BOG':{lat:4.7016,lng:-74.1469},'MDE':{lat:6.1645,lng:-75.4231},'CLO':{lat:3.5432,lng:-76.3816},
+  'SCL':{lat:-33.3930,lng:-70.7858},'LIM':{lat:-12.0219,lng:-77.1143},'UIO':{lat:-0.1292,lng:-78.3575},
+  'EZE':{lat:-34.8222,lng:-58.5358},'AEP':{lat:-34.5592,lng:-58.4156},'COR':{lat:-31.3236,lng:-64.2081},
+  'MVD':{lat:-34.8384,lng:-56.0308},'ASU':{lat:-25.2400,lng:-57.5191},'VVI':{lat:-17.6448,lng:-63.1354},
+  'CCS':{lat:10.6012,lng:-66.9916},'GYE':{lat:-2.1574,lng:-79.8837},
+  // Caribbean
+  'SJU':{lat:18.4394,lng:-66.0018},'NAS':{lat:25.0390,lng:-77.4662},'MBJ':{lat:18.5037,lng:-77.9134},
+  'KIN':{lat:17.9357,lng:-76.7875},'PUJ':{lat:18.5674,lng:-68.3634},'SDQ':{lat:18.4297,lng:-69.6689},
+  'HAV':{lat:22.9892,lng:-82.4091},'POS':{lat:10.5954,lng:-61.3372},'BGI':{lat:13.0746,lng:-59.4925},
 };
 
 // ==========================================
@@ -1170,7 +1410,12 @@ function applyFilters() {
           !(f._airline || '').toLowerCase().includes(q) &&
           !(f._dep || '').toLowerCase().includes(q) &&
           !(f._arr || '').toLowerCase().includes(q) &&
-          !(f._country || '').toLowerCase().includes(q)) return false;
+          !(f._country || '').toLowerCase().includes(q) &&
+          !(f._icao || '').toLowerCase().includes(q) &&
+          !(f._registration || '').toLowerCase().includes(q) &&
+          !(f._aircraft || '').toLowerCase().includes(q) &&
+          !(f._depCity || '').toLowerCase().includes(q) &&
+          !(f._arrCity || '').toLowerCase().includes(q)) return false;
     }
     return true;
   });
@@ -1359,10 +1604,12 @@ function updateMapDisplay() {
 function buildPopup(f) {
   const color = statusColor(f);
   const si = statusInfo(f);
-  const altStr = f._altFt > 0 ? f._altFt.toLocaleString() + ' ft' : 'Ground';
-  const spdStr = f._speedKmh > 0 ? f._speedKmh.toLocaleString() + ' km/h' : '--';
+  const altStr = f._altFt > 0 ? f._altFt.toLocaleString() + ' ft (FL' + Math.round(f._altFt/100) + ')' : 'Ground';
+  const kts = f._speedKts || Math.round(f._speedKmh * 0.539957);
+  const spdStr = f._speedKmh > 0 ? kts + ' kts' : '--';
   const vsign = f._vRateFpm > 100 ? '▲' : f._vRateFpm < -100 ? '▼' : '—';
   const vsColor = f._vRateFpm > 100 ? '#00e676' : f._vRateFpm < -100 ? '#ff7043' : '#4a6882';
+  const sqInfo = SQUAWK_CODES[f._squawk] || null;
   
   return `
     <div class="aero-popup">
@@ -1378,10 +1625,13 @@ function buildPopup(f) {
         <div class="aero-popup-grid">
           <div class="aero-popup-item"><div class="aero-popup-item-label">ALTITUDE</div><div class="aero-popup-item-val" style="color:${color}">${altStr}</div></div>
           <div class="aero-popup-item"><div class="aero-popup-item-label">SPEED</div><div class="aero-popup-item-val" style="color:${color}">${spdStr}</div></div>
-          <div class="aero-popup-item"><div class="aero-popup-item-label">HEADING</div><div class="aero-popup-item-val" style="color:${color}">${Math.round(f._heading)}°</div></div>
+          <div class="aero-popup-item"><div class="aero-popup-item-label">HEADING</div><div class="aero-popup-item-val" style="color:${color}">${Math.round(f._heading)}° ${compassDir(f._heading)}</div></div>
           <div class="aero-popup-item"><div class="aero-popup-item-label">VERT RATE</div><div class="aero-popup-item-val" style="color:${vsColor}">${vsign} ${Math.abs(f._vRateFpm)} fpm</div></div>
         </div>
-        ${f._aircraft ? `<div style="margin-top:6px;font-family:'Share Tech Mono',monospace;font-size:10px;color:#4a6882">ACFT: ${f._aircraft}${f._registration ? ' · ' + f._registration : ''} · SQK: ${f._squawk}</div>` : ''}
+        <div style="margin-top:6px;font-family:'Share Tech Mono',monospace;font-size:10px;color:#4a6882">
+          ${f._aircraft ? `ACFT: ${f._aircraft}` : `ICAO: ${f._icao}`}${f._registration ? ' · ' + f._registration : ''} · SQK: ${f._squawk}${sqInfo ? ' ' + sqInfo.icon : ''}
+        </div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:#2a4562;margin-top:2px">${f._posSource || 'ADS-B'} · ${f._country}</div>
         <div style="margin-top:6px;font-size:10px;color:#2a4562;text-align:right">Click for full details →</div>
       </div>
     </div>`;
@@ -1457,6 +1707,36 @@ function renderDetailPanel(f) {
   const vsColor = f._vRateFpm > 100 ? 'var(--green)' : f._vRateFpm < -100 ? '#ff7043' : 'var(--text3)';
   const altColor = f._altFt > 30000 ? 'var(--accent)' : f._altFt > 10000 ? '#4dd0e1' : 'var(--text2)';
   
+  // Calculate distance & ETA
+  let totalDistKm = null, remainDistKm = null, etaStr = '--', flownKm = null;
+  if (f._depLat && f._arrLat && f._lat) {
+    totalDistKm = haversineKm(f._depLat, f._depLng, f._arrLat, f._arrLng);
+    remainDistKm = haversineKm(f._lat, f._lng, f._arrLat, f._arrLng);
+    flownKm = haversineKm(f._depLat, f._depLng, f._lat, f._lng);
+    if (f._speedKmh > 50 && remainDistKm > 0) {
+      const etaHrs = remainDistKm / f._speedKmh;
+      const hrs = Math.floor(etaHrs);
+      const mins = Math.round((etaHrs - hrs) * 60);
+      etaStr = `${hrs}h ${mins}m`;
+    }
+  }
+  
+  // Calculate Mach number
+  const mach = f._speedKmh > 200 && f._altFt > 5000 ? estimateMach(f._speedKmh, f._altFt) : null;
+  
+  // Squawk info
+  const sqInfo = SQUAWK_CODES[f._squawk] || null;
+  const sqColor = sqInfo ? sqInfo.color : 'var(--text2)';
+  const sqText = sqInfo ? ` ${sqInfo.icon} ${sqInfo.text}` : '';
+  
+  // Flight phase
+  let flightPhase = 'Cruise';
+  if (f._isGround) flightPhase = 'On Ground';
+  else if (f._vRateFpm > 500) flightPhase = 'Climbing';
+  else if (f._vRateFpm < -500) flightPhase = 'Descending';
+  else if (f._altFt < 10000 && f._vRateFpm > 100) flightPhase = 'Departure';
+  else if (f._altFt < 10000 && f._vRateFpm < -100) flightPhase = 'Approach';
+  
   content.innerHTML = `
     <!-- Header -->
     <div class="dp-header">
@@ -1465,7 +1745,7 @@ function renderDetailPanel(f) {
           <span style="font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:800;color:#fff;letter-spacing:0.04em">${f._callsign}</span>
           <span class="badge badge-${si.cls}">${si.label}</span>
         </div>
-        <div style="font-size:12px;color:var(--text3);margin-top:3px">${f._flag} ${f._airline}</div>
+        <div style="font-size:12px;color:var(--text3);margin-top:3px">${f._flag} ${f._airline}${f._airlineIata ? ' (' + f._airlineIata + ')' : ''}</div>
         ${f._aircraft ? `<div style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text3);margin-top:2px">${f._aircraft}${f._registration ? ' · ' + f._registration : ''}</div>` : ''}
       </div>
       <button onclick="closeDetailPanel()" style="background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer;padding:4px;line-height:1;transition:color .15s" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text3)'">✕</button>
@@ -1491,6 +1771,14 @@ function renderDetailPanel(f) {
         </div>
       </div>
       <div class="route-progress"><div class="route-fill" style="width:${prog}%"></div></div>
+      ${totalDistKm ? `<div style="display:flex;justify-content:space-between;margin-top:6px;font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3)">
+        <span>DIST: ${Math.round(totalDistKm).toLocaleString()} km (${Math.round(kmToNm(totalDistKm)).toLocaleString()} nm)</span>
+        <span>ETA: ${etaStr}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-top:2px;font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3)">
+        <span>FLOWN: ${Math.round(flownKm).toLocaleString()} km</span>
+        <span>REM: ${Math.round(remainDistKm).toLocaleString()} km</span>
+      </div>` : ''}
     </div>
 
     <!-- Mini map -->
@@ -1504,15 +1792,17 @@ function renderDetailPanel(f) {
           <div class="tel-label">ALTITUDE</div>
           <div class="tel-value" style="color:${altColor}">${f._altFt > 0 ? f._altFt.toLocaleString() : '0'}<span class="tel-unit">ft</span></div>
           ${f._altGeoFt !== f._altFt ? `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text3);margin-top:2px">GEO: ${f._altGeoFt.toLocaleString()} ft</div>` : ''}
+          <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text3);margin-top:2px">FL${Math.round(f._altFt / 100)}</div>
         </div>
         <div class="tel-card">
           <div class="tel-label">GROUND SPEED</div>
           <div class="tel-value" style="color:var(--green)">${f._speedKmh}<span class="tel-unit">km/h</span></div>
-          <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text3);margin-top:2px">${Math.round(f._speedKmh * 0.539957)} kts</div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text3);margin-top:2px">${f._speedKts || Math.round(f._speedKmh * 0.539957)} kts${mach ? ' · M' + mach.toFixed(2) : ''}</div>
         </div>
         <div class="tel-card">
           <div class="tel-label">VERT RATE</div>
           <div class="tel-value" style="color:${vsColor}">${vsign}${f._vRateFpm.toLocaleString()}<span class="tel-unit">fpm</span></div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text3);margin-top:2px">${flightPhase}</div>
         </div>
         <div class="tel-card">
           <div class="tel-label">HEADING</div>
@@ -1524,11 +1814,19 @@ function renderDetailPanel(f) {
 
     <!-- Flight info -->
     <div class="dp-section">
-      <div class="dp-label">DETAILS</div>
+      <div class="dp-label">FLIGHT DETAILS</div>
       <div class="mini-stat-row"><span class="mini-stat-key">ICAO24</span><span class="mini-stat-val" style="color:var(--text2);font-family:'Share Tech Mono',monospace">${f._icao || '--'}</span></div>
-      <div class="mini-stat-row"><span class="mini-stat-key">Squawk</span><span class="mini-stat-val" style="color:${f._squawk === '7700' ? 'var(--red)' : f._squawk === '7600' ? 'var(--amber)' : f._squawk === '7500' ? 'var(--red)' : 'var(--text2)'};font-family:'Share Tech Mono',monospace">${f._squawk || '--'}${f._squawk === '7700' ? ' ⚠ EMERGENCY' : f._squawk === '7600' ? ' ⚠ RADIO FAIL' : f._squawk === '7500' ? ' ⚠ HIJACK' : ''}</span></div>
+      <div class="mini-stat-row"><span class="mini-stat-key">Callsign</span><span class="mini-stat-val" style="color:var(--text2);font-family:'Share Tech Mono',monospace">${f._callsign || '--'}</span></div>
+      ${f._registration ? `<div class="mini-stat-row"><span class="mini-stat-key">Registration</span><span class="mini-stat-val" style="color:var(--text2);font-family:'Share Tech Mono',monospace">${f._registration}</span></div>` : ''}
+      ${f._aircraft ? `<div class="mini-stat-row"><span class="mini-stat-key">Aircraft Type</span><span class="mini-stat-val" style="color:var(--text2);font-family:'Share Tech Mono',monospace">${f._aircraft}</span></div>` : ''}
+      <div class="mini-stat-row"><span class="mini-stat-key">Squawk</span><span class="mini-stat-val" style="color:${sqColor};font-family:'Share Tech Mono',monospace">${f._squawk || '--'}${sqText}</span></div>
       <div class="mini-stat-row"><span class="mini-stat-key">Country</span><span class="mini-stat-val" style="color:var(--text2)">${f._flag} ${f._country || '--'}</span></div>
+      <div class="mini-stat-row"><span class="mini-stat-key">Source</span><span class="mini-stat-val" style="color:var(--text2);font-family:'Share Tech Mono',monospace">${f._posSource || 'ADS-B'}</span></div>
       <div class="mini-stat-row"><span class="mini-stat-key">Last contact</span><span class="mini-stat-val" style="color:var(--text2)">${fmtAgo(f._lastContact)}</span></div>
+      <div class="mini-stat-row"><span class="mini-stat-key">Flight Level</span><span class="mini-stat-val" style="color:var(--text2);font-family:'Share Tech Mono',monospace">FL${Math.round(f._altFt / 100)}</span></div>
+      ${mach ? `<div class="mini-stat-row"><span class="mini-stat-key">Mach Number</span><span class="mini-stat-val" style="color:var(--text2);font-family:'Share Tech Mono',monospace">M${mach.toFixed(3)}</span></div>` : ''}
+      <div class="mini-stat-row"><span class="mini-stat-key">Flight Phase</span><span class="mini-stat-val" style="color:var(--text2)">${flightPhase}</span></div>
+      ${f._spi ? `<div class="mini-stat-row"><span class="mini-stat-key">SPI</span><span class="mini-stat-val" style="color:var(--amber)">⚠ IDENT Active</span></div>` : ''}
       <div class="mini-stat-row" style="border:none"><span class="mini-stat-key">Position</span><span class="mini-stat-val" style="color:var(--text2);font-family:'Share Tech Mono',monospace;font-size:10px">${f._lat?.toFixed(4)}°, ${f._lng?.toFixed(4)}°</span></div>
     </div>
 
@@ -1640,6 +1938,7 @@ function renderList() {
       case 'altitude': av = a._altFt; bv = b._altFt; break;
       case 'speed':    av = a._speedKmh; bv = b._speedKmh; break;
       case 'heading':  av = a._heading; bv = b._heading; break;
+      case 'country':  av = a._country || ''; bv = b._country || ''; break;
       case 'updated':  av = a._lastContact || 0; bv = b._lastContact || 0; break;
       default:         av = a._altFt; bv = b._altFt;
     }
@@ -1660,10 +1959,14 @@ function renderList() {
     const s = si(f);
     const sel = G.selectedId === f._id;
     const color = statusColor(f);
+    const kts = f._speedKts || Math.round(f._speedKmh * 0.539957);
+    const subInfo = f._aircraft
+      ? f._aircraft + (f._registration ? ' · ' + f._registration : '')
+      : f._icao;
     return `<tr class="${sel ? 'selected' : ''}" data-id="${f._id}" onclick="selectFlight('${f._id}')">
       <td>
         <div style="font-family:'Share Tech Mono',monospace;font-weight:500;font-size:12px;color:#d8e8f8">${f._callsign}</div>
-        ${f._aircraft ? `<div style="font-size:10px;color:var(--text3)">${f._aircraft}</div>` : ''}
+        <div style="font-size:10px;color:var(--text3)">${subInfo}</div>
       </td>
       <td>
         <div style="font-size:12px;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${f._flag} ${f._airline}</div>
@@ -1673,8 +1976,11 @@ function renderList() {
       </td>
       <td><span class="badge badge-${s.cls}">${s.label}</span></td>
       <td class="hidden-sm"><span style="font-family:'Share Tech Mono',monospace;font-size:11px;color:${color}">${f._altFt > 0 ? f._altFt.toLocaleString() : '—'}</span></td>
-      <td class="hidden-sm"><span style="font-family:'Share Tech Mono',monospace;font-size:11px;color:${f._speedKmh > 0 ? 'var(--green)' : 'var(--text3)'}">${f._speedKmh > 0 ? f._speedKmh : '—'}</span></td>
-      <td class="hidden-md"><span style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text3)">${Math.round(f._heading)}°</span></td>
+      <td class="hidden-sm">
+        <span style="font-family:'Share Tech Mono',monospace;font-size:11px;color:${f._speedKmh > 0 ? 'var(--green)' : 'var(--text3)'}">${f._speedKmh > 0 ? kts + ' kts' : '—'}</span>
+      </td>
+      <td class="hidden-md"><span style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text3)">${Math.round(f._heading)}° ${compassDir(f._heading)}</span></td>
+      <td class="hidden-md"><span style="font-size:11px;color:var(--text2)">${f._flag} ${(f._country || '--').substring(0,16)}</span></td>
       <td class="hidden-md"><span style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3)">${fmtAgo(f._lastContact)}</span></td>
     </tr>`;
   }).join('');
@@ -1861,8 +2167,13 @@ function handleSearch(query) {
     (f._dep || '').toLowerCase().includes(q) ||
     (f._arr || '').toLowerCase().includes(q) ||
     (f._country || '').toLowerCase().includes(q) ||
-    (f._icao || '').toLowerCase().includes(q)
-  ).slice(0, 10);
+    (f._icao || '').toLowerCase().includes(q) ||
+    (f._registration || '').toLowerCase().includes(q) ||
+    (f._depCity || '').toLowerCase().includes(q) ||
+    (f._arrCity || '').toLowerCase().includes(q) ||
+    (f._aircraft || '').toLowerCase().includes(q) ||
+    (f._squawk || '').includes(q)
+  ).slice(0, MAX_SEARCH_RESULTS);
   
   if (!matches.length) {
     results.style.display = 'none';
@@ -1873,10 +2184,11 @@ function handleSearch(query) {
   results.style.display = 'block';
   results.innerHTML = matches.map(f => {
     const si = statusInfo(f);
+    const altStr = f._altFt > 0 ? 'FL' + Math.round(f._altFt/100) : 'GND';
     return `<div onclick="selectSearchResult('${f._id}')" style="padding:9px 12px;cursor:pointer;border-bottom:1px solid rgba(26,47,74,.5);display:flex;align-items:center;justify-content:space-between;transition:background .1s" onmouseover="this.style.background='rgba(0,200,255,.05)'" onmouseout="this.style.background=''">
       <div>
         <div style="font-family:'Share Tech Mono',monospace;font-size:13px;font-weight:600;color:#d8e8f8">${f._callsign}</div>
-        <div style="font-size:11px;color:var(--text3)">${f._flag} ${f._airline} · ${f._dep || '?'} → ${f._arr || '?'}</div>
+        <div style="font-size:11px;color:var(--text3)">${f._flag} ${f._airline} · ${f._dep || '?'} → ${f._arr || '?'} · ${altStr}</div>
       </div>
       <span class="badge badge-${si.cls}">${si.label}</span>
     </div>`;
@@ -1918,20 +2230,12 @@ function startAutoRefresh() {
     if (cdEl) cdEl.textContent = G.countdown + 's';
     if (G.countdown <= 0) {
       G.countdown = REFRESH_SEC;
-      // Simulate positions every tick
+      fetchAll();
+    } else if (G.flights.length) {
+      // Simulate smooth movement between API fetches
       simulatePositions();
-      updateMapDisplay();
-      if (G.tab === 'list') renderList();
-      // Full fetch every 3 ticks
-      if (G.countdown % (REFRESH_SEC) === 0 || !G._fetchCycle) {
-        G._fetchCycle = (G._fetchCycle || 0) + 1;
-        fetchAll();
-      }
-    }
-    // Simulate movement every second for smooth visuals
-    if (G.flights.length && G.tab === 'map') {
-      simulatePositions();
-      updateMapDisplay();
+      if (G.tab === 'map') updateMapDisplay();
+      else if (G.tab === 'list') renderList();
     }
   }, 1000);
 }
@@ -1973,12 +2277,16 @@ function startClock() {
 // EXPORT CSV
 // ==========================================
 function exportCSV() {
-  const headers = ['Callsign','ICAO24','Airline','Country','Dep','Arr','Status','Alt(ft)','Speed(km/h)','Heading','VRate(fpm)','Lat','Lng','Squawk'];
+  const headers = ['Callsign','ICAO24','Airline','Country','Departure','Arrival','DepCity','ArrCity','Status','Alt(ft)','AltGeo(ft)','Speed(km/h)','Speed(kts)','Heading','VRate(fpm)','Lat','Lng','Squawk','Aircraft','Registration','Source','FlightLevel'];
   const rows = G.filtered.map(f => [
     f._callsign, f._icao, f._airline, f._country,
-    f._dep || '', f._arr || '', f._status,
-    Math.round(f._altFt), Math.round(f._speedKmh), Math.round(f._heading),
-    Math.round(f._vRateFpm), f._lat?.toFixed(5) || '', f._lng?.toFixed(5) || '', f._squawk
+    f._dep || '', f._arr || '', f._depCity || '', f._arrCity || '',
+    f._status, Math.round(f._altFt), Math.round(f._altGeoFt),
+    Math.round(f._speedKmh), f._speedKts || Math.round(f._speedKmh * 0.539957),
+    Math.round(f._heading), Math.round(f._vRateFpm),
+    f._lat?.toFixed(5) || '', f._lng?.toFixed(5) || '', f._squawk,
+    f._aircraft || '', f._registration || '', f._posSource || 'ADS-B',
+    'FL' + Math.round(f._altFt / 100)
   ]);
   const csv = [headers, ...rows].map(r => r.map(v => `"${(v||'').toString().replace(/"/g,'""')}"`).join(',')).join('\n');
   const blob = new Blob([csv], { type: 'text/csv' });
