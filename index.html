@@ -317,6 +317,21 @@ tbody td{padding:7px 12px;font-size:12px}
 .toggle-slider:before{content:'';position:absolute;width:16px;height:16px;left:2px;bottom:2px;background:var(--text2);border-radius:50%;transition:.3s}
 .toggle-switch input:checked+.toggle-slider{background:var(--accent2)}
 .toggle-switch input:checked+.toggle-slider:before{transform:translateX(16px);background:#fff}
+/* Bookmarks */
+.bookmark-btn{background:none;border:none;cursor:pointer;color:var(--text3);font-size:16px;padding:2px;transition:color .15s}
+.bookmark-btn:hover,.bookmark-btn.bookmarked{color:var(--amber)}
+#bookmarks-panel{display:none;padding:8px 12px;background:var(--surface);border-bottom:1px solid var(--border)}
+#bookmarks-panel.has-bookmarks{display:block}
+.bookmark-chip{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;margin:2px;border-radius:12px;font-family:var(--mono);font-size:10px;background:rgba(255,171,0,.08);border:1px solid rgba(255,171,0,.2);color:var(--amber);cursor:pointer;transition:all .15s}
+.bookmark-chip:hover{background:rgba(255,171,0,.15)}
+.bookmark-chip .remove-bm{font-size:12px;color:var(--text3);margin-left:2px;cursor:pointer}
+.bookmark-chip .remove-bm:hover{color:var(--red)}
+/* Emergency alert banner */
+#emergency-banner{display:none;padding:6px 14px;background:rgba(255,23,68,.12);border-bottom:1px solid rgba(255,23,68,.3);font-family:var(--mono);font-size:11px;color:var(--red);text-align:center;animation:emergency-flash 2s ease-in-out infinite}
+#emergency-banner.visible{display:block}
+@keyframes emergency-flash{0%,100%{background:rgba(255,23,68,.08)}50%{background:rgba(255,23,68,.18)}}
+.emergency-item{display:inline-flex;align-items:center;gap:4px;margin:0 8px;cursor:pointer}
+.emergency-item:hover{text-decoration:underline}
 /* AviationStack key */
 /* ⚠️ Replace with your own key from aviationstack.com (free tier works) */
 /* ⚠️ OpenSky Network is used as primary (free, no auth) */
@@ -440,6 +455,12 @@ tbody td{padding:7px 12px;font-size:12px}
       <div id="flight-count-badge"><span id="filtered-count">0</span> shown</div>
     </div>
   </div>
+
+  <!-- BOOKMARKS BAR -->
+  <div id="bookmarks-panel"></div>
+
+  <!-- EMERGENCY BANNER -->
+  <div id="emergency-banner"></div>
 
   <!-- WORKSPACE -->
   <div id="workspace">
@@ -615,6 +636,7 @@ tbody td{padding:7px 12px;font-size:12px}
         <div class="chart-card"><div class="chart-card-title">TOP AIRLINES (active)</div><div class="chart-wrap"><canvas id="chart-airlines"></canvas></div></div>
         <div class="chart-card"><div class="chart-card-title">TOP AIRPORTS (traffic)</div><div class="chart-wrap"><canvas id="chart-airports"></canvas></div></div>
         <div class="chart-card"><div class="chart-card-title">ALTITUDE BANDS (ft)</div><div class="chart-wrap"><canvas id="chart-altitude"></canvas></div></div>
+        <div class="chart-card"><div class="chart-card-title">SPEED DISTRIBUTION</div><div class="chart-wrap"><canvas id="chart-speed"></canvas></div></div>
       </div>
     </div>
 
@@ -1346,6 +1368,8 @@ async function fetchAll() {
     updateStats();
     updateSidebarStats();
     updateMapChips();
+    checkEmergencySquawks();
+    renderBookmarksBar();
     updateLastContact();
     
   } catch(err) {
@@ -1936,6 +1960,9 @@ function renderDetailPanel(f) {
 
     <!-- Actions -->
     <div class="dp-action-row">
+      <button class="dp-action-btn secondary bookmark-btn ${loadBookmarks().includes(f._callsign.trim()) ? 'bookmarked' : ''}" onclick="toggleBookmark('${f._callsign.trim()}')" id="dp-bookmark-btn" title="Add to watch list">
+        ★
+      </button>
       <button class="dp-action-btn ${G.following ? 'primary' : 'secondary'}" onclick="toggleFollow()" id="dp-follow-btn">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
         ${G.following ? 'Following' : 'Follow'}
@@ -1948,6 +1975,10 @@ function renderDetailPanel(f) {
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
         ADSB-X
       </a>
+      <button class="dp-action-btn secondary" onclick="shareFlight('${f._callsign.trim()}')" title="Copy link">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        Share
+      </button>
     </div>
     <div style="padding:0 14px 12px;font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text3);text-align:center">
       DATA: OpenSky Network · AviationStack · Last update: ${fmtAgo(Math.floor(Date.now()/1000) - 5)}
@@ -2126,6 +2157,11 @@ function updateStats() {
     altBuckets[Math.min(8, Math.floor(f._altFt / 5000))]++;
   });
   
+  const spdBuckets = new Array(7).fill(0);
+  G.flights.filter(f => f._speedKmh > 0).forEach(f => {
+    spdBuckets[Math.min(6, Math.floor(f._speedKmh / 200))]++;
+  });
+  
   updateChart('chart-status', 'doughnut', 
     ['Active', 'Scheduled', 'Landed', 'Diverted', 'Ground'],
     [statusDist.active, statusDist.scheduled, statusDist.landed, statusDist.diverted, statusDist.ground],
@@ -2136,6 +2172,7 @@ function updateStats() {
   updateBarChart('chart-airlines', topAirlines.map(a => a[0].replace(/Airlines|Airways|Air /g,'').trim().slice(0,14)), topAirlines.map(a => a[1]), 'rgba(0,200,255,.3)', '#00c8ff', true);
   updateBarChart('chart-airports', topApt.map(a => a[0]), topApt.map(a => a[1]), 'rgba(124,77,255,.3)', '#7c4dff', true);
   updateBarChart('chart-altitude', ['0-5k','5-10k','10-15k','15-20k','20-25k','25-30k','30-35k','35-40k','40k+'], altBuckets, 'rgba(0,230,118,.3)', '#00e676', false);
+  updateBarChart('chart-speed', ['0-200','200-400','400-600','600-800','800-1000','1000-1200','1200+'], spdBuckets, 'rgba(255,171,0,.3)', '#ffab00', false);
 }
 
 function initCharts() {
@@ -2158,7 +2195,7 @@ function initCharts() {
     options: { ...base, cutout: '62%' }
   });
   
-  ['chart-airlines', 'chart-airports', 'chart-altitude'].forEach(id => {
+  ['chart-airlines', 'chart-airports', 'chart-altitude', 'chart-speed'].forEach(id => {
     G.charts[id] = new Chart(document.getElementById(id), {
       type: 'bar',
       data: { labels: [], datasets: [{ data: [], backgroundColor: [], borderColor: [], borderWidth: 1, borderRadius: 3 }] },
@@ -2174,6 +2211,8 @@ function initCharts() {
   });
   G.charts['chart-altitude'].options.indexAxis = 'x';
   G.charts['chart-altitude'].update();
+  G.charts['chart-speed'].options.indexAxis = 'x';
+  G.charts['chart-speed'].update();
 }
 
 function updateChart(id, type, labels, data, bg, border) {
@@ -2807,6 +2846,125 @@ function changeMapTiles(style) {
 }
 
 // ==========================================
+// BOOKMARKS / WATCH LIST
+// ==========================================
+function loadBookmarks() {
+  try {
+    return JSON.parse(localStorage.getItem('aerotrack-bookmarks') || '[]');
+  } catch(e) { return []; }
+}
+
+function saveBookmarks(bookmarks) {
+  try {
+    localStorage.setItem('aerotrack-bookmarks', JSON.stringify(bookmarks));
+  } catch(e) {}
+}
+
+function toggleBookmark(callsign) {
+  if (!callsign) return;
+  let bookmarks = loadBookmarks();
+  const idx = bookmarks.indexOf(callsign);
+  if (idx >= 0) {
+    bookmarks.splice(idx, 1);
+    toast(`Removed ${callsign} from watch list`, 'info', 2000);
+  } else {
+    bookmarks.push(callsign);
+    toast(`Added ${callsign} to watch list`, 'success', 2000);
+  }
+  saveBookmarks(bookmarks);
+  renderBookmarksBar();
+  const bmBtn = document.getElementById('dp-bookmark-btn');
+  if (bmBtn) bmBtn.classList.toggle('bookmarked', bookmarks.includes(callsign));
+}
+
+function renderBookmarksBar() {
+  const panel = document.getElementById('bookmarks-panel');
+  if (!panel) return;
+  const bookmarks = loadBookmarks();
+  if (!bookmarks.length) {
+    panel.classList.remove('has-bookmarks');
+    return;
+  }
+  panel.classList.add('has-bookmarks');
+  panel.innerHTML = `<div style="font-family:var(--mono);font-size:9px;letter-spacing:0.1em;color:var(--text3);margin-bottom:4px">★ WATCH LIST</div>` +
+    bookmarks.map(cs => {
+      const f = G.flights.find(x => x._callsign.trim() === cs);
+      const statusDot = f ? (f._isGround ? '⬤' : '✈') : '○';
+      return `<span class="bookmark-chip" onclick="jumpToBookmark('${cs}')">${statusDot} ${cs}<span class="remove-bm" onclick="event.stopPropagation();toggleBookmark('${cs}')">✕</span></span>`;
+    }).join('');
+}
+
+function jumpToBookmark(callsign) {
+  const f = G.flights.find(x => x._callsign.trim() === callsign);
+  if (f) {
+    switchTab('map');
+    selectFlight(f._id);
+  } else {
+    toast(`${callsign} not currently tracked`, 'warning', 2000);
+  }
+}
+
+// ==========================================
+// SHARE FLIGHT
+// ==========================================
+function shareFlight(callsign) {
+  const url = window.location.origin + window.location.pathname + '?flight=' + encodeURIComponent(callsign);
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(url).then(() => {
+      toast('Flight link copied to clipboard!', 'success', 2500);
+    }).catch(() => {
+      toast('Could not copy link', 'warning', 2000);
+    });
+  } else {
+    // Fallback for older browsers without Clipboard API
+    const ta = document.createElement('textarea');
+    ta.value = url;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy'); // eslint-disable-line no-deprecated
+    document.body.removeChild(ta);
+    toast('Flight link copied!', 'success', 2500);
+  }
+}
+
+function checkUrlFlight() {
+  const params = new URLSearchParams(window.location.search);
+  const flightParam = params.get('flight');
+  if (flightParam) {
+    setTimeout(() => {
+      const f = G.flights.find(x => x._callsign.trim() === flightParam);
+      if (f) {
+        selectFlight(f._id);
+        toast(`Loaded shared flight: ${flightParam}`, 'info', 3000);
+      } else {
+        toast(`Flight ${flightParam} not currently tracked`, 'warning', 3000);
+      }
+    }, 3000);
+  }
+}
+
+// ==========================================
+// EMERGENCY ALERTS
+// ==========================================
+function checkEmergencySquawks() {
+  const emergencyCodes = Object.keys(SQUAWK_CODES).filter(c => ['7500','7600','7700'].includes(c));
+  const emergencyFlights = G.flights.filter(f => emergencyCodes.includes(f._squawk));
+  const banner = document.getElementById('emergency-banner');
+  if (!banner) return;
+  
+  if (emergencyFlights.length === 0) {
+    banner.classList.remove('visible');
+    return;
+  }
+  
+  banner.classList.add('visible');
+  banner.innerHTML = '🚨 EMERGENCY: ' + emergencyFlights.map(f => {
+    const sq = SQUAWK_CODES[f._squawk];
+    return `<span class="emergency-item" onclick="selectFlight('${f._id}')">${sq?.icon || '⚠'} ${f._callsign} — ${sq?.text || 'SQUAWK ' + f._squawk}</span>`;
+  }).join(' | ');
+}
+
+// ==========================================
 // LOADER ANIMATION
 // ==========================================
 async function runLoader() {
@@ -2853,6 +3011,7 @@ async function init() {
   startAutoRefresh();
   
   toast('AeroTrack Live — tracking the skies', 'success', 3500);
+  checkUrlFlight();
 }
 
 // Expose globals for inline handlers
@@ -2861,6 +3020,9 @@ window.selectSearchResult = selectSearchResult;
 window.closeDetailPanel = closeDetailPanel;
 window.toggleFollow = toggleFollow;
 window.toggleSidebar = toggleSidebar;
+window.toggleBookmark = toggleBookmark;
+window.jumpToBookmark = jumpToBookmark;
+window.shareFlight = shareFlight;
 
 window.addEventListener('DOMContentLoaded', init);
 </script>
