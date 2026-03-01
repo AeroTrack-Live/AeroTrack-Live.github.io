@@ -48,6 +48,19 @@
   --cond:'Barlow Condensed',sans-serif;
 }
 
+html.light{
+  --bg:#f0f4f8;--bg2:#ffffff;--surface:#e8edf2;--card:#ffffff;--card2:#f5f7fa;
+  --border:#d0d8e0;--border2:#b8c4d0;--accent:#0078d4;--accent2:#005a9e;
+  --green:#00a651;--green2:#008040;--amber:#d48800;--red:#d41534;--purple:#6b3fa0;
+  --text:#1a2a3a;--text2:#4a5a6a;--text3:#7a8a9a;
+}
+html.light .leaflet-container{background:#e8edf2 !important}
+html.light .marker-cluster div{background:rgba(0,120,212,.15) !important;color:var(--accent) !important;border:1px solid rgba(0,120,212,.3) !important;box-shadow:0 0 8px rgba(0,120,212,.15) !important}
+html.light .marker-cluster{background:rgba(0,120,212,.06) !important}
+html.light .leaflet-popup-content-wrapper{background:#fff !important;color:#1a2a3a !important;border:1px solid #d0d8e0 !important;box-shadow:0 4px 20px rgba(0,0,0,.12) !important}
+html.light .leaflet-popup-tip{background:#fff !important}
+html.light .leaflet-control-zoom a{background:#fff !important;color:#4a5a6a !important;border-bottom:1px solid #d0d8e0 !important}
+html.light .leaflet-control-zoom a:hover{background:#f0f4f8 !important;color:var(--accent) !important}
 html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--sans);}
 
 /* Scrollbar */
@@ -288,6 +301,22 @@ tbody td{padding:7px 12px;font-size:12px}
 .shortcut-row{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px}
 .shortcut-key{font-family:var(--mono);font-size:10px;background:var(--surface);border:1px solid var(--border2);border-radius:4px;padding:2px 7px;color:var(--text2)}
 
+/* Settings modal */
+#settings-modal{position:fixed;inset:0;z-index:99998;display:none;align-items:center;justify-content:center;background:rgba(4,8,15,.85);backdrop-filter:blur(4px)}
+#settings-modal.open{display:flex}
+.settings-box{background:var(--card);border:1px solid var(--border2);border-radius:12px;padding:24px;width:380px;max-height:80vh;overflow-y:auto}
+.settings-group{margin-bottom:16px}
+.settings-group-title{font-family:var(--mono);font-size:10px;letter-spacing:0.12em;color:var(--text3);margin-bottom:8px}
+.settings-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;color:var(--text2)}
+.settings-row:last-child{border-bottom:none}
+.settings-row select{background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:4px 8px;font-family:var(--mono);font-size:11px;color:var(--text);outline:none;cursor:pointer}
+.settings-row select:focus{border-color:var(--accent2)}
+.toggle-switch{position:relative;width:36px;height:20px;cursor:pointer}
+.toggle-switch input{opacity:0;width:0;height:0}
+.toggle-slider{position:absolute;inset:0;background:var(--border2);border-radius:10px;transition:.3s}
+.toggle-slider:before{content:'';position:absolute;width:16px;height:16px;left:2px;bottom:2px;background:var(--text2);border-radius:50%;transition:.3s}
+.toggle-switch input:checked+.toggle-slider{background:var(--accent2)}
+.toggle-switch input:checked+.toggle-slider:before{transform:translateX(16px);background:#fff}
 /* AviationStack key */
 /* ⚠️ Replace with your own key from aviationstack.com (free tier works) */
 /* ⚠️ OpenSky Network is used as primary (free, no auth) */
@@ -371,6 +400,9 @@ tbody td{padding:7px 12px;font-size:12px}
       </button>
       <button class="icon-btn" id="btn-shortcuts" title="Keyboard shortcuts (?)" aria-label="Shortcuts">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M8 12h.01M12 12h.01M16 12h.01M7 16h10"/></svg>
+      </button>
+      <button class="icon-btn" id="btn-settings" title="Settings" aria-label="Settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
       </button>
       <div id="total-pill" style="background:var(--card);border:1px solid var(--border);border-radius:4px;padding:3px 9px;font-family:var(--mono);font-size:11px;color:var(--text2)">
         <span id="total-num" style="color:var(--accent)">0</span> flights
@@ -601,11 +633,81 @@ tbody td{padding:7px 12px;font-size:12px}
     <div class="shortcut-row"><span>Toggle follow mode</span><kbd class="shortcut-key">F</kbd></div>
     <div class="shortcut-row"><span>Toggle sidebar</span><kbd class="shortcut-key">B</kbd></div>
     <div class="shortcut-row"><span>Export CSV</span><kbd class="shortcut-key">E</kbd></div>
+    <div class="shortcut-row"><span>Settings</span><kbd class="shortcut-key">,</kbd></div>
     <div class="shortcut-row" style="border-bottom:none"><span>This help</span><kbd class="shortcut-key">?</kbd></div>
     <button onclick="document.getElementById('shortcuts-modal').classList.remove('open')" style="margin-top:16px;width:100%;padding:8px;border-radius:6px;background:var(--surface);border:1px solid var(--border);color:var(--text2);font-family:var(--sans);font-size:13px;cursor:pointer">Close</button>
   </div>
 </div>
 
+<!-- Settings modal -->
+<div id="settings-modal">
+  <div class="settings-box fade-up">
+    <div style="font-family:var(--cond);font-size:16px;font-weight:700;letter-spacing:0.08em;margin-bottom:16px;color:var(--text);display:flex;align-items:center;justify-content:space-between">
+      SETTINGS
+      <button onclick="document.getElementById('settings-modal').classList.remove('open')" style="background:none;border:none;color:var(--text3);font-size:16px;cursor:pointer">&#10005;</button>
+    </div>
+    <div class="settings-group">
+      <div class="settings-group-title">DATA</div>
+      <div class="settings-row">
+        <span>Refresh Interval</span>
+        <select id="set-refresh">
+          <option value="5">5 seconds</option>
+          <option value="10">10 seconds</option>
+          <option value="15" selected>15 seconds</option>
+          <option value="30">30 seconds</option>
+          <option value="60">60 seconds</option>
+        </select>
+      </div>
+      <div class="settings-row">
+        <span>Auto-enrich flights</span>
+        <label class="toggle-switch"><input type="checkbox" id="set-enrich" checked/><span class="toggle-slider"></span></label>
+      </div>
+    </div>
+    <div class="settings-group">
+      <div class="settings-group-title">DISPLAY</div>
+      <div class="settings-row">
+        <span>Units</span>
+        <select id="set-units">
+          <option value="aviation" selected>Aviation (kts, ft)</option>
+          <option value="metric">Metric (km/h, m)</option>
+          <option value="imperial">Imperial (mph, ft)</option>
+        </select>
+      </div>
+      <div class="settings-row">
+        <span>Theme</span>
+        <select id="set-theme">
+          <option value="dark" selected>Dark</option>
+          <option value="light">Light</option>
+        </select>
+      </div>
+      <div class="settings-row">
+        <span>Map Style</span>
+        <select id="set-map-style">
+          <option value="dark" selected>Dark (CartoDB)</option>
+          <option value="satellite">Satellite (ESRI)</option>
+          <option value="streets">Streets (OSM)</option>
+          <option value="terrain">Terrain (Stamen)</option>
+        </select>
+      </div>
+    </div>
+    <div class="settings-group">
+      <div class="settings-group-title">MAP OVERLAYS</div>
+      <div class="settings-row">
+        <span>Trail lines</span>
+        <label class="toggle-switch"><input type="checkbox" id="set-trails" checked/><span class="toggle-slider"></span></label>
+      </div>
+      <div class="settings-row">
+        <span>Projection lines</span>
+        <label class="toggle-switch"><input type="checkbox" id="set-proj" checked/><span class="toggle-slider"></span></label>
+      </div>
+      <div class="settings-row">
+        <span>Marker clustering</span>
+        <label class="toggle-switch"><input type="checkbox" id="set-cluster" checked/><span class="toggle-slider"></span></label>
+      </div>
+    </div>
+    <button onclick="document.getElementById('settings-modal').classList.remove('open')" style="margin-top:8px;width:100%;padding:8px;border-radius:6px;background:var(--surface);border:1px solid var(--border);color:var(--text2);font-family:var(--sans);font-size:13px;cursor:pointer">Done</button>
+  </div>
+</div>
 <!-- Toast stack -->
 <div id="toast-stack"></div>
 
@@ -653,6 +755,8 @@ const G = {
   showRoutes: false,
   autoRefresh: true,
   countdown: REFRESH_SEC,
+  refreshSec: REFRESH_SEC,
+  units: 'aviation',
   
   // sort
   sortCol: 'altitude',
@@ -1439,7 +1543,7 @@ function initMap() {
   });
   
   // Dark tiles — CartoDB
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+  currentTileLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
     maxZoom: 19,
     subdomains: 'abcd',
   }).addTo(G.map);
@@ -1574,7 +1678,7 @@ function updateMapDisplay() {
     }
     
     // Projection line to destination
-    if (f._arrLat && !f._isGround) {
+    if (f._arrLat && !f._isGround && settingsShowProj) {
       if (G.projLines[f._id]) {
         G.projLines[f._id].setLatLngs([[f._lat, f._lng], [f._arrLat, f._arrLng]]);
       } else {
@@ -2223,13 +2327,13 @@ function switchTab(tab) {
 // ==========================================
 function startAutoRefresh() {
   stopAutoRefresh();
-  G.countdown = REFRESH_SEC;
+  G.countdown = G.refreshSec || REFRESH_SEC;
   G.countdownTimer = setInterval(() => {
     G.countdown--;
     const cdEl = document.getElementById('countdown');
     if (cdEl) cdEl.textContent = G.countdown + 's';
     if (G.countdown <= 0) {
-      G.countdown = REFRESH_SEC;
+      G.countdown = G.refreshSec || REFRESH_SEC;
       fetchAll();
     } else if (G.flights.length) {
       // Simulate smooth movement between API fetches
@@ -2246,9 +2350,9 @@ function stopAutoRefresh() {
 }
 
 function doRefresh() {
-  G.countdown = REFRESH_SEC;
+  G.countdown = G.refreshSec || REFRESH_SEC;
   const cdEl = document.getElementById('countdown');
-  if (cdEl) cdEl.textContent = REFRESH_SEC + 's';
+  if (cdEl) cdEl.textContent = (G.refreshSec || REFRESH_SEC) + 's';
   fetchAll();
   const btn = document.getElementById('btn-refresh');
   if (btn) {
@@ -2533,12 +2637,173 @@ function wireNavbar() {
       case 'b': case 'B': toggleSidebar(); break;
       case 'e': case 'E': exportCSV(); break;
       case '?': document.getElementById('shortcuts-modal').classList.add('open'); break;
+      case ',': document.getElementById('settings-modal').classList.add('open'); break;
     }
   });
 }
 
 function toggleSidebar() {
   document.getElementById('sidebar').classList.toggle('collapsed');
+}
+
+// ==========================================
+// SETTINGS
+// ==========================================
+const TILE_LAYERS = {
+  dark: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+  satellite: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+  streets: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+  terrain: 'https://tiles.stadiamaps.com/tiles/stamen_terrain/{z}/{x}/{y}{r}.png',
+};
+
+let currentTileLayer = null;
+let settingsAutoEnrich = true;
+let settingsShowProj = true;
+
+function loadSettings() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('aerotrack-settings') || '{}');
+    if (saved.refreshSec) {
+      const sel = document.getElementById('set-refresh');
+      if (sel) sel.value = saved.refreshSec;
+      G.refreshSec = parseInt(saved.refreshSec);
+    }
+    if (saved.units) {
+      const sel = document.getElementById('set-units');
+      if (sel) sel.value = saved.units;
+      G.units = saved.units;
+    }
+    if (saved.theme) {
+      const sel = document.getElementById('set-theme');
+      if (sel) sel.value = saved.theme;
+      if (saved.theme === 'light') document.documentElement.classList.add('light');
+    }
+    if (saved.mapStyle) {
+      const sel = document.getElementById('set-map-style');
+      if (sel) sel.value = saved.mapStyle;
+    }
+    if (saved.trails === false) {
+      G.trailsOn = false;
+      const cb = document.getElementById('set-trails');
+      if (cb) cb.checked = false;
+    }
+    if (saved.proj === false) {
+      settingsShowProj = false;
+      const cb = document.getElementById('set-proj');
+      if (cb) cb.checked = false;
+    }
+    if (saved.cluster === false) {
+      G.clusterOn = false;
+      const cb = document.getElementById('set-cluster');
+      if (cb) cb.checked = false;
+    }
+    if (saved.enrich === false) {
+      settingsAutoEnrich = false;
+      const cb = document.getElementById('set-enrich');
+      if (cb) cb.checked = false;
+    }
+  } catch(e) {}
+}
+
+function saveSettings() {
+  try {
+    localStorage.setItem('aerotrack-settings', JSON.stringify({
+      refreshSec: document.getElementById('set-refresh')?.value || '15',
+      units: document.getElementById('set-units')?.value || 'aviation',
+      theme: document.getElementById('set-theme')?.value || 'dark',
+      mapStyle: document.getElementById('set-map-style')?.value || 'dark',
+      trails: document.getElementById('set-trails')?.checked ?? true,
+      proj: document.getElementById('set-proj')?.checked ?? true,
+      cluster: document.getElementById('set-cluster')?.checked ?? true,
+      enrich: document.getElementById('set-enrich')?.checked ?? true,
+    }));
+  } catch(e) {}
+}
+
+function wireSettings() {
+  document.getElementById('btn-settings')?.addEventListener('click', () => {
+    document.getElementById('settings-modal').classList.add('open');
+  });
+
+  document.getElementById('settings-modal')?.addEventListener('click', function(e) {
+    if (e.target === this) this.classList.remove('open');
+  });
+
+  document.getElementById('set-refresh')?.addEventListener('change', function() {
+    const newSec = parseInt(this.value);
+    G.refreshSec = newSec;
+    if (G.autoRefresh) { stopAutoRefresh(); startAutoRefresh(); }
+    saveSettings();
+    toast('Refresh interval: ' + newSec + 's', 'info', 2000);
+  });
+
+  document.getElementById('set-units')?.addEventListener('change', function() {
+    G.units = this.value;
+    saveSettings();
+    applyFilters();
+    toast('Units: ' + this.value, 'info', 2000);
+  });
+
+  document.getElementById('set-theme')?.addEventListener('change', function() {
+    if (this.value === 'light') {
+      document.documentElement.classList.add('light');
+    } else {
+      document.documentElement.classList.remove('light');
+    }
+    saveSettings();
+  });
+
+  document.getElementById('set-map-style')?.addEventListener('change', function() {
+    changeMapTiles(this.value);
+    saveSettings();
+  });
+
+  document.getElementById('set-trails')?.addEventListener('change', function() {
+    G.trailsOn = this.checked;
+    const mc = document.getElementById('mc-trails');
+    if (mc) { mc.classList.toggle('active', G.trailsOn); mc.style.color = G.trailsOn ? 'var(--accent)' : ''; }
+    updateMapDisplay();
+    saveSettings();
+  });
+
+  document.getElementById('set-proj')?.addEventListener('change', function() {
+    settingsShowProj = this.checked;
+    if (!settingsShowProj) {
+      Object.keys(G.projLines).forEach(id => {
+        G.map.removeLayer(G.projLines[id]);
+        delete G.projLines[id];
+      });
+    }
+    updateMapDisplay();
+    saveSettings();
+  });
+
+  document.getElementById('set-cluster')?.addEventListener('change', function() {
+    G.clusterOn = this.checked;
+    const mc = document.getElementById('mc-cluster');
+    if (mc) mc.classList.toggle('active', G.clusterOn);
+    if (G.clusterOn) {
+      G.map.removeLayer(G.freeLayer);
+      G.map.addLayer(G.cluster);
+    } else {
+      G.map.removeLayer(G.cluster);
+      G.map.addLayer(G.freeLayer);
+    }
+    G.markers = {};
+    updateMapDisplay();
+    saveSettings();
+  });
+
+  document.getElementById('set-enrich')?.addEventListener('change', function() {
+    settingsAutoEnrich = this.checked;
+    saveSettings();
+  });
+}
+
+function changeMapTiles(style) {
+  const url = TILE_LAYERS[style] || TILE_LAYERS.dark;
+  if (currentTileLayer) G.map.removeLayer(currentTileLayer);
+  currentTileLayer = L.tileLayer(url, { maxZoom: 19, subdomains: style === 'streets' ? 'abc' : 'abcd' }).addTo(G.map);
 }
 
 // ==========================================
@@ -2577,6 +2842,8 @@ async function init() {
   wireFilters();
   wireMapControls();
   wireNavbar();
+  wireSettings();
+  loadSettings();
   startClock();
   
   // Fetch real data
