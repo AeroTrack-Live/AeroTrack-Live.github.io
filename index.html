@@ -1805,9 +1805,9 @@ function buildPopup(f) {
   const color = statusColor(f);
   const si = statusInfo(f);
   const units = G.units || 'aviation';
-  const altStr = f._altFt > 0 ? (units === 'metric' ? Math.round(f._altFt * 0.3048).toLocaleString() + ' m' : f._altFt.toLocaleString() + ' ft (FL' + Math.round(f._altFt/100) + ')') : 'Ground';
+  const altStr = f._altFt > 0 ? fmtAlt(f._altFt, units) : 'Ground';
   const kts = f._speedKts || Math.round(f._speedKmh * 0.539957);
-  const spdStr = f._speedKmh > 0 ? (units === 'metric' ? f._speedKmh + ' km/h' : units === 'imperial' ? Math.round(f._speedKmh * 0.621371) + ' mph' : kts + ' kts') : '--';
+  const spdStr = f._speedKmh > 0 ? fmtSpeed(f._speedKmh, kts, units) : '--';
   const vsign = f._vRateFpm > 100 ? '▲' : f._vRateFpm < -100 ? '▼' : '—';
   const vsColor = f._vRateFpm > 100 ? '#00e676' : f._vRateFpm < -100 ? '#ff7043' : '#4a6882';
   const sqInfo = SQUAWK_CODES[f._squawk] || null;
@@ -2126,6 +2126,17 @@ function toggleFollow() {
 function compassDir(deg) {
   const dirs = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
   return dirs[Math.round(deg / 22.5) % 16];
+}
+
+function fmtAlt(altFt, units) {
+  if (units === 'metric') return Math.round(altFt * 0.3048).toLocaleString() + ' m';
+  return altFt.toLocaleString() + ' ft (FL' + Math.round(altFt / 100) + ')';
+}
+
+function fmtSpeed(speedKmh, speedKts, units) {
+  if (units === 'metric') return speedKmh + ' km/h';
+  if (units === 'imperial') return Math.round(speedKmh * 0.621371) + ' mph';
+  return speedKts + ' kts';
 }
 
 // ==========================================
@@ -2775,6 +2786,7 @@ const TILE_LAYERS = {
   dark: { url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', subdomains: 'abcd' },
   satellite: { url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', subdomains: 'abcd' },
   streets: { url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', subdomains: 'abc' },
+  // Stadia Maps terrain tiles (free for non-commercial use; may require API key for production)
   terrain: { url: 'https://tiles.stadiamaps.com/tiles/stamen_terrain/{z}/{x}/{y}{r}.png', subdomains: 'abcd' },
 };
 
@@ -3014,6 +3026,8 @@ function checkUrlFlight() {
   const params = new URLSearchParams(window.location.search);
   const flightParam = params.get('flight');
   if (flightParam) {
+    // Wait for initial data fetch to complete before looking up the shared flight
+    const SHARED_FLIGHT_LOAD_DELAY = 3000;
     setTimeout(() => {
       const f = G.flights.find(x => x._callsign.trim() === flightParam);
       if (f) {
@@ -3022,7 +3036,7 @@ function checkUrlFlight() {
       } else {
         toast(`Flight ${flightParam} not currently tracked`, 'warning', 3000);
       }
-    }, 3000);
+    }, SHARED_FLIGHT_LOAD_DELAY);
   }
 }
 
@@ -3079,11 +3093,15 @@ function renderHeatmap() {
   
   const maxDensity = Math.max(...Object.values(density), 1);
   
+  const DENSITY_COLORS = { high: '#ff1744', medium: '#ffab00', low: '#00c8ff', minimal: '#1a2f4a' };
+  const BASE_RADIUS = 30000; // meters
+  const MAX_EXTRA_RADIUS = 120000; // meters
+
   Object.entries(density).forEach(([key, count]) => {
     const [lat, lng] = key.split(',').map(Number);
     const intensity = count / maxDensity;
-    const radius = 30000 + intensity * 120000;
-    const color = intensity > 0.7 ? '#ff1744' : intensity > 0.4 ? '#ffab00' : intensity > 0.2 ? '#00c8ff' : '#1a2f4a';
+    const radius = BASE_RADIUS + intensity * MAX_EXTRA_RADIUS;
+    const color = intensity > 0.7 ? DENSITY_COLORS.high : intensity > 0.4 ? DENSITY_COLORS.medium : intensity > 0.2 ? DENSITY_COLORS.low : DENSITY_COLORS.minimal;
     const circle = L.circle([lat + gridSize/2, lng + gridSize/2], {
       radius,
       color: 'transparent',
