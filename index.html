@@ -48,6 +48,19 @@
   --cond:'Barlow Condensed',sans-serif;
 }
 
+html.light{
+  --bg:#f0f4f8;--bg2:#ffffff;--surface:#e8edf2;--card:#ffffff;--card2:#f5f7fa;
+  --border:#d0d8e0;--border2:#b8c4d0;--accent:#0078d4;--accent2:#005a9e;
+  --green:#00a651;--green2:#008040;--amber:#d48800;--red:#d41534;--purple:#6b3fa0;
+  --text:#1a2a3a;--text2:#4a5a6a;--text3:#7a8a9a;
+}
+html.light .leaflet-container{background:#e8edf2 !important}
+html.light .marker-cluster div{background:rgba(0,120,212,.15) !important;color:var(--accent) !important;border:1px solid rgba(0,120,212,.3) !important;box-shadow:0 0 8px rgba(0,120,212,.15) !important}
+html.light .marker-cluster{background:rgba(0,120,212,.06) !important}
+html.light .leaflet-popup-content-wrapper{background:#fff !important;color:#1a2a3a !important;border:1px solid #d0d8e0 !important;box-shadow:0 4px 20px rgba(0,0,0,.12) !important}
+html.light .leaflet-popup-tip{background:#fff !important}
+html.light .leaflet-control-zoom a{background:#fff !important;color:#4a5a6a !important;border-bottom:1px solid #d0d8e0 !important}
+html.light .leaflet-control-zoom a:hover{background:#f0f4f8 !important;color:var(--accent) !important}
 html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--sans);}
 
 /* Scrollbar */
@@ -288,6 +301,56 @@ tbody td{padding:7px 12px;font-size:12px}
 .shortcut-row{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px}
 .shortcut-key{font-family:var(--mono);font-size:10px;background:var(--surface);border:1px solid var(--border2);border-radius:4px;padding:2px 7px;color:var(--text2)}
 
+/* Settings modal */
+#settings-modal{position:fixed;inset:0;z-index:99998;display:none;align-items:center;justify-content:center;background:rgba(4,8,15,.85);backdrop-filter:blur(4px)}
+#settings-modal.open{display:flex}
+.settings-box{background:var(--card);border:1px solid var(--border2);border-radius:12px;padding:24px;width:380px;max-height:80vh;overflow-y:auto}
+.settings-group{margin-bottom:16px}
+.settings-group-title{font-family:var(--mono);font-size:10px;letter-spacing:0.12em;color:var(--text3);margin-bottom:8px}
+.settings-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;color:var(--text2)}
+.settings-row:last-child{border-bottom:none}
+.settings-row select{background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:4px 8px;font-family:var(--mono);font-size:11px;color:var(--text);outline:none;cursor:pointer}
+.settings-row select:focus{border-color:var(--accent2)}
+.toggle-switch{position:relative;width:36px;height:20px;cursor:pointer}
+.toggle-switch input{opacity:0;width:0;height:0}
+.toggle-slider{position:absolute;inset:0;background:var(--border2);border-radius:10px;transition:.3s}
+.toggle-slider:before{content:'';position:absolute;width:16px;height:16px;left:2px;bottom:2px;background:var(--text2);border-radius:50%;transition:.3s}
+.toggle-switch input:checked+.toggle-slider{background:var(--accent2)}
+.toggle-switch input:checked+.toggle-slider:before{transform:translateX(16px);background:#fff}
+/* Bookmarks */
+.bookmark-btn{background:none;border:none;cursor:pointer;color:var(--text3);font-size:16px;padding:2px;transition:color .15s}
+.bookmark-btn:hover,.bookmark-btn.bookmarked{color:var(--amber)}
+#bookmarks-panel{display:none;padding:8px 12px;background:var(--surface);border-bottom:1px solid var(--border)}
+#bookmarks-panel.has-bookmarks{display:block}
+.bookmark-chip{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;margin:2px;border-radius:12px;font-family:var(--mono);font-size:10px;background:rgba(255,171,0,.08);border:1px solid rgba(255,171,0,.2);color:var(--amber);cursor:pointer;transition:all .15s}
+.bookmark-chip:hover{background:rgba(255,171,0,.15)}
+.bookmark-chip .remove-bm{font-size:12px;color:var(--text3);margin-left:2px;cursor:pointer}
+.bookmark-chip .remove-bm:hover{color:var(--red)}
+/* Emergency alert banner */
+#emergency-banner{display:none;padding:6px 14px;background:rgba(255,23,68,.12);border-bottom:1px solid rgba(255,23,68,.3);font-family:var(--mono);font-size:11px;color:var(--red);text-align:center;animation:emergency-flash 2s ease-in-out infinite}
+#emergency-banner.visible{display:block}
+@keyframes emergency-flash{0%,100%{background:rgba(255,23,68,.08)}50%{background:rgba(255,23,68,.18)}}
+.emergency-item{display:inline-flex;align-items:center;gap:4px;margin:0 8px;cursor:pointer}
+.emergency-item:hover{text-decoration:underline}
+/* About modal */
+#about-modal{position:fixed;inset:0;z-index:99998;display:none;align-items:center;justify-content:center;background:rgba(4,8,15,.85);backdrop-filter:blur(4px)}
+#about-modal.open{display:flex}
+.about-box{background:var(--card);border:1px solid var(--border2);border-radius:12px;padding:28px;width:400px;max-height:80vh;overflow-y:auto;text-align:center}
+.about-logo{width:56px;height:56px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--accent),var(--purple));border-radius:14px;margin:0 auto 14px}
+.about-logo svg{fill:#fff;width:28px;height:28px}
+.about-title{font-family:var(--cond);font-weight:800;font-size:22px;letter-spacing:0.1em;background:linear-gradient(135deg,var(--accent),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.about-version{font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:2px;letter-spacing:0.1em}
+.about-desc{font-size:13px;color:var(--text2);margin:14px 0;line-height:1.6}
+.about-credits{font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:14px;line-height:1.8}
+.about-credits a{color:var(--accent);text-decoration:none}
+.about-credits a:hover{text-decoration:underline}
+/* Empty state */
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 24px;color:var(--text3);text-align:center}
+.empty-state-icon{font-size:48px;margin-bottom:16px;opacity:.5}
+.empty-state-title{font-family:var(--cond);font-size:18px;font-weight:700;color:var(--text2);margin-bottom:8px}
+.empty-state-desc{font-size:12px;max-width:280px;line-height:1.5}
+.empty-state-btn{margin-top:16px;padding:8px 20px;border-radius:6px;background:rgba(0,200,255,.1);border:1px solid rgba(0,200,255,.25);color:var(--accent);font-family:var(--sans);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s}
+.empty-state-btn:hover{background:rgba(0,200,255,.2)}
 /* AviationStack key */
 /* ⚠️ Replace with your own key from aviationstack.com (free tier works) */
 /* ⚠️ OpenSky Network is used as primary (free, no auth) */
@@ -304,9 +367,28 @@ tbody td{padding:7px 12px;font-size:12px}
   #search-wrap{max-width:200px}
   .stats-grid{grid-template-columns:1fr 1fr}
 }
+/* Print */
+@media print{
+  #topbar,#tabbar,#sidebar,#detail-panel,.map-controls,#map-bottom-controls,#map-info-bar,#toast-stack,#loader,#shortcuts-modal,#settings-modal,#about-modal,#bookmarks-panel,#emergency-banner,.icon-btn,.fpill,.map-ctrl-btn{display:none !important}
+  html,body,#app,#workspace{height:auto !important;overflow:visible !important}
+  #view-map,#map-container,#map{height:500px !important;display:block !important}
+  #view-list{display:block !important;overflow:visible !important}
+  #view-stats{display:block !important;overflow:visible !important}
+  *{color:#000 !important;background:#fff !important;border-color:#ddd !important;box-shadow:none !important}
+  .stat-card-value{color:#333 !important}
+  .badge{border:1px solid #999 !important}
+  table{page-break-inside:auto}
+  tr{page-break-inside:avoid}
+  @page{margin:1cm}
+}
+/* Focus visible */
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:3px}
+button:focus-visible,.icon-btn:focus-visible,.tab-btn:focus-visible,.fpill:focus-visible,.map-ctrl-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 </style>
 </head>
 <body>
+
+<a href="#map" class="skip-link" style="position:absolute;top:-100px;left:0;padding:8px 16px;background:var(--accent);color:#fff;z-index:99999;font-family:var(--sans);font-size:13px;border-radius:0 0 6px 0;transition:top .2s;text-decoration:none" onfocus="this.style.top='0'" onblur="this.style.top='-100px'">Skip to map</a>
 
 <!-- LOADER -->
 <div id="loader">
@@ -328,7 +410,7 @@ tbody td{padding:7px 12px;font-size:12px}
 </div>
 
 <!-- APP -->
-<div id="app">
+<div id="app" role="application" aria-label="AeroTrack Live Flight Tracker">
 
   <!-- TOP BAR -->
   <div id="topbar">
@@ -372,6 +454,12 @@ tbody td{padding:7px 12px;font-size:12px}
       <button class="icon-btn" id="btn-shortcuts" title="Keyboard shortcuts (?)" aria-label="Shortcuts">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M8 12h.01M12 12h.01M16 12h.01M7 16h10"/></svg>
       </button>
+      <button class="icon-btn" id="btn-settings" title="Settings" aria-label="Settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </button>
+      <button class="icon-btn" id="btn-about" title="About AeroTrack" aria-label="About">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+      </button>
       <div id="total-pill" style="background:var(--card);border:1px solid var(--border);border-radius:4px;padding:3px 9px;font-family:var(--mono);font-size:11px;color:var(--text2)">
         <span id="total-num" style="color:var(--accent)">0</span> flights
       </div>
@@ -409,11 +497,17 @@ tbody td{padding:7px 12px;font-size:12px}
     </div>
   </div>
 
+  <!-- BOOKMARKS BAR -->
+  <div id="bookmarks-panel"></div>
+
+  <!-- EMERGENCY BANNER -->
+  <div id="emergency-banner"></div>
+
   <!-- WORKSPACE -->
-  <div id="workspace">
+  <div id="workspace" role="main">
 
     <!-- SIDEBAR -->
-    <div id="sidebar">
+    <div id="sidebar" role="complementary" aria-label="Filters">
       <div class="sidebar-section">
         <div class="sidebar-label">FILTERS</div>
         <div id="sb-stats">
@@ -564,8 +658,13 @@ tbody td{padding:7px 12px;font-size:12px}
           </thead>
           <tbody id="list-body"></tbody>
         </table>
-        <div id="list-empty" style="display:none;text-align:center;padding:48px;font-family:var(--mono);font-size:12px;color:var(--text3)">
-          No flights match current filters
+        <div id="list-empty" style="display:none">
+          <div class="empty-state">
+            <div class="empty-state-icon">✈</div>
+            <div class="empty-state-title">No flights found</div>
+            <div class="empty-state-desc">No flights match your current filters. Try adjusting your search criteria or reset all filters.</div>
+            <button class="empty-state-btn" onclick="document.getElementById('sb-reset').click()">Reset Filters</button>
+          </div>
         </div>
       </div>
     </div>
@@ -583,6 +682,7 @@ tbody td{padding:7px 12px;font-size:12px}
         <div class="chart-card"><div class="chart-card-title">TOP AIRLINES (active)</div><div class="chart-wrap"><canvas id="chart-airlines"></canvas></div></div>
         <div class="chart-card"><div class="chart-card-title">TOP AIRPORTS (traffic)</div><div class="chart-wrap"><canvas id="chart-airports"></canvas></div></div>
         <div class="chart-card"><div class="chart-card-title">ALTITUDE BANDS (ft)</div><div class="chart-wrap"><canvas id="chart-altitude"></canvas></div></div>
+        <div class="chart-card"><div class="chart-card-title">SPEED DISTRIBUTION</div><div class="chart-wrap"><canvas id="chart-speed"></canvas></div></div>
       </div>
     </div>
 
@@ -601,11 +701,107 @@ tbody td{padding:7px 12px;font-size:12px}
     <div class="shortcut-row"><span>Toggle follow mode</span><kbd class="shortcut-key">F</kbd></div>
     <div class="shortcut-row"><span>Toggle sidebar</span><kbd class="shortcut-key">B</kbd></div>
     <div class="shortcut-row"><span>Export CSV</span><kbd class="shortcut-key">E</kbd></div>
+    <div class="shortcut-row"><span>Settings</span><kbd class="shortcut-key">,</kbd></div>
+    <div class="shortcut-row"><span>About</span><kbd class="shortcut-key">A</kbd></div>
     <div class="shortcut-row" style="border-bottom:none"><span>This help</span><kbd class="shortcut-key">?</kbd></div>
     <button onclick="document.getElementById('shortcuts-modal').classList.remove('open')" style="margin-top:16px;width:100%;padding:8px;border-radius:6px;background:var(--surface);border:1px solid var(--border);color:var(--text2);font-family:var(--sans);font-size:13px;cursor:pointer">Close</button>
   </div>
 </div>
 
+<!-- Settings modal -->
+<div id="settings-modal">
+  <div class="settings-box fade-up">
+    <div style="font-family:var(--cond);font-size:16px;font-weight:700;letter-spacing:0.08em;margin-bottom:16px;color:var(--text);display:flex;align-items:center;justify-content:space-between">
+      SETTINGS
+      <button onclick="document.getElementById('settings-modal').classList.remove('open')" style="background:none;border:none;color:var(--text3);font-size:16px;cursor:pointer">&#10005;</button>
+    </div>
+    <div class="settings-group">
+      <div class="settings-group-title">DATA</div>
+      <div class="settings-row">
+        <span>Refresh Interval</span>
+        <select id="set-refresh">
+          <option value="5">5 seconds</option>
+          <option value="10">10 seconds</option>
+          <option value="15" selected>15 seconds</option>
+          <option value="30">30 seconds</option>
+          <option value="60">60 seconds</option>
+        </select>
+      </div>
+      <div class="settings-row">
+        <span>Auto-enrich flights</span>
+        <label class="toggle-switch"><input type="checkbox" id="set-enrich" checked/><span class="toggle-slider"></span></label>
+      </div>
+    </div>
+    <div class="settings-group">
+      <div class="settings-group-title">DISPLAY</div>
+      <div class="settings-row">
+        <span>Units</span>
+        <select id="set-units">
+          <option value="aviation" selected>Aviation (kts, ft)</option>
+          <option value="metric">Metric (km/h, m)</option>
+          <option value="imperial">Imperial (mph, ft)</option>
+        </select>
+      </div>
+      <div class="settings-row">
+        <span>Theme</span>
+        <select id="set-theme">
+          <option value="dark" selected>Dark</option>
+          <option value="light">Light</option>
+        </select>
+      </div>
+      <div class="settings-row">
+        <span>Map Style</span>
+        <select id="set-map-style">
+          <option value="dark" selected>Dark (CartoDB)</option>
+          <option value="satellite">Satellite (ESRI)</option>
+          <option value="streets">Streets (OSM)</option>
+          <option value="terrain">Terrain (Stamen)</option>
+        </select>
+      </div>
+    </div>
+    <div class="settings-group">
+      <div class="settings-group-title">MAP OVERLAYS</div>
+      <div class="settings-row">
+        <span>Trail lines</span>
+        <label class="toggle-switch"><input type="checkbox" id="set-trails" checked/><span class="toggle-slider"></span></label>
+      </div>
+      <div class="settings-row">
+        <span>Projection lines</span>
+        <label class="toggle-switch"><input type="checkbox" id="set-proj" checked/><span class="toggle-slider"></span></label>
+      </div>
+      <div class="settings-row">
+        <span>Marker clustering</span>
+        <label class="toggle-switch"><input type="checkbox" id="set-cluster" checked/><span class="toggle-slider"></span></label>
+      </div>
+    </div>
+    <button onclick="document.getElementById('settings-modal').classList.remove('open')" style="margin-top:8px;width:100%;padding:8px;border-radius:6px;background:var(--surface);border:1px solid var(--border);color:var(--text2);font-family:var(--sans);font-size:13px;cursor:pointer">Done</button>
+  </div>
+</div>
+<!-- About modal -->
+<div id="about-modal">
+  <div class="about-box fade-up">
+    <div class="about-logo">
+      <svg viewBox="0 0 24 24"><path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg>
+    </div>
+    <div class="about-title">AEROTRACK LIVE</div>
+    <div class="about-version">v2.0.0 — GLOBAL FLIGHT TRACKER</div>
+    <div class="about-desc">
+      Real-time global flight tracking powered by ADS-B data. Monitor thousands of aircraft worldwide with live positions, telemetry, and flight information.
+    </div>
+    <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:12px 0">
+      <span class="badge badge-active">Real-Time Tracking</span>
+      <span class="badge badge-scheduled">Global Coverage</span>
+      <span class="badge badge-active">ADS-B Data</span>
+    </div>
+    <div class="about-credits">
+      Data: <a href="https://opensky-network.org" target="_blank" rel="noopener">OpenSky Network</a> · <a href="https://aviationstack.com" target="_blank" rel="noopener">AviationStack</a><br/>
+      Maps: <a href="https://leafletjs.com" target="_blank" rel="noopener">Leaflet</a> · <a href="https://carto.com" target="_blank" rel="noopener">CartoDB</a><br/>
+      Charts: <a href="https://www.chartjs.org" target="_blank" rel="noopener">Chart.js</a><br/><br/>
+      Built with ❤️ for aviation enthusiasts
+    </div>
+    <button onclick="document.getElementById('about-modal').classList.remove('open')" style="margin-top:18px;width:100%;padding:8px;border-radius:6px;background:var(--surface);border:1px solid var(--border);color:var(--text2);font-family:var(--sans);font-size:13px;cursor:pointer">Close</button>
+  </div>
+</div>
 <!-- Toast stack -->
 <div id="toast-stack"></div>
 
@@ -653,6 +849,8 @@ const G = {
   showRoutes: false,
   autoRefresh: true,
   countdown: REFRESH_SEC,
+  refreshSec: REFRESH_SEC,
+  units: 'aviation',
   
   // sort
   sortCol: 'altitude',
@@ -1242,6 +1440,8 @@ async function fetchAll() {
     updateStats();
     updateSidebarStats();
     updateMapChips();
+    checkEmergencySquawks();
+    renderBookmarksBar();
     updateLastContact();
     
   } catch(err) {
@@ -1439,7 +1639,7 @@ function initMap() {
   });
   
   // Dark tiles — CartoDB
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+  currentTileLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
     maxZoom: 19,
     subdomains: 'abcd',
   }).addTo(G.map);
@@ -1574,7 +1774,7 @@ function updateMapDisplay() {
     }
     
     // Projection line to destination
-    if (f._arrLat && !f._isGround) {
+    if (f._arrLat && !f._isGround && settingsShowProj) {
       if (G.projLines[f._id]) {
         G.projLines[f._id].setLatLngs([[f._lat, f._lng], [f._arrLat, f._arrLng]]);
       } else {
@@ -1604,9 +1804,10 @@ function updateMapDisplay() {
 function buildPopup(f) {
   const color = statusColor(f);
   const si = statusInfo(f);
-  const altStr = f._altFt > 0 ? f._altFt.toLocaleString() + ' ft (FL' + Math.round(f._altFt/100) + ')' : 'Ground';
+  const units = G.units || 'aviation';
+  const altStr = f._altFt > 0 ? fmtAlt(f._altFt, units) : 'Ground';
   const kts = f._speedKts || Math.round(f._speedKmh * 0.539957);
-  const spdStr = f._speedKmh > 0 ? kts + ' kts' : '--';
+  const spdStr = f._speedKmh > 0 ? fmtSpeed(f._speedKmh, kts, units) : '--';
   const vsign = f._vRateFpm > 100 ? '▲' : f._vRateFpm < -100 ? '▼' : '—';
   const vsColor = f._vRateFpm > 100 ? '#00e676' : f._vRateFpm < -100 ? '#ff7043' : '#4a6882';
   const sqInfo = SQUAWK_CODES[f._squawk] || null;
@@ -1832,6 +2033,9 @@ function renderDetailPanel(f) {
 
     <!-- Actions -->
     <div class="dp-action-row">
+      <button class="dp-action-btn secondary bookmark-btn ${loadBookmarks().includes(f._callsign.trim()) ? 'bookmarked' : ''}" onclick="toggleBookmark('${f._callsign.trim()}')" id="dp-bookmark-btn" title="Add to watch list">
+        ★
+      </button>
       <button class="dp-action-btn ${G.following ? 'primary' : 'secondary'}" onclick="toggleFollow()" id="dp-follow-btn">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
         ${G.following ? 'Following' : 'Follow'}
@@ -1844,6 +2048,10 @@ function renderDetailPanel(f) {
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
         ADSB-X
       </a>
+      <button class="dp-action-btn secondary" onclick="shareFlight('${f._callsign.trim()}')" title="Copy link">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        Share
+      </button>
     </div>
     <div style="padding:0 14px 12px;font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text3);text-align:center">
       DATA: OpenSky Network · AviationStack · Last update: ${fmtAgo(Math.floor(Date.now()/1000) - 5)}
@@ -1918,6 +2126,17 @@ function toggleFollow() {
 function compassDir(deg) {
   const dirs = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
   return dirs[Math.round(deg / 22.5) % 16];
+}
+
+function fmtAlt(altFt, units) {
+  if (units === 'metric') return Math.round(altFt * 0.3048).toLocaleString() + ' m';
+  return altFt.toLocaleString() + ' ft (FL' + Math.round(altFt / 100) + ')';
+}
+
+function fmtSpeed(speedKmh, speedKts, units) {
+  if (units === 'metric') return speedKmh + ' km/h';
+  if (units === 'imperial') return Math.round(speedKmh * 0.621371) + ' mph';
+  return speedKts + ' kts';
 }
 
 // ==========================================
@@ -2022,6 +2241,11 @@ function updateStats() {
     altBuckets[Math.min(8, Math.floor(f._altFt / 5000))]++;
   });
   
+  const spdBuckets = new Array(7).fill(0);
+  G.flights.filter(f => f._speedKmh > 0).forEach(f => {
+    spdBuckets[Math.min(6, Math.floor(f._speedKmh / 200))]++;
+  });
+  
   updateChart('chart-status', 'doughnut', 
     ['Active', 'Scheduled', 'Landed', 'Diverted', 'Ground'],
     [statusDist.active, statusDist.scheduled, statusDist.landed, statusDist.diverted, statusDist.ground],
@@ -2032,6 +2256,7 @@ function updateStats() {
   updateBarChart('chart-airlines', topAirlines.map(a => a[0].replace(/Airlines|Airways|Air /g,'').trim().slice(0,14)), topAirlines.map(a => a[1]), 'rgba(0,200,255,.3)', '#00c8ff', true);
   updateBarChart('chart-airports', topApt.map(a => a[0]), topApt.map(a => a[1]), 'rgba(124,77,255,.3)', '#7c4dff', true);
   updateBarChart('chart-altitude', ['0-5k','5-10k','10-15k','15-20k','20-25k','25-30k','30-35k','35-40k','40k+'], altBuckets, 'rgba(0,230,118,.3)', '#00e676', false);
+  updateBarChart('chart-speed', ['0-200','200-400','400-600','600-800','800-1000','1000-1200','1200+'], spdBuckets, 'rgba(255,171,0,.3)', '#ffab00', false);
 }
 
 function initCharts() {
@@ -2054,7 +2279,7 @@ function initCharts() {
     options: { ...base, cutout: '62%' }
   });
   
-  ['chart-airlines', 'chart-airports', 'chart-altitude'].forEach(id => {
+  ['chart-airlines', 'chart-airports', 'chart-altitude', 'chart-speed'].forEach(id => {
     G.charts[id] = new Chart(document.getElementById(id), {
       type: 'bar',
       data: { labels: [], datasets: [{ data: [], backgroundColor: [], borderColor: [], borderWidth: 1, borderRadius: 3 }] },
@@ -2070,6 +2295,8 @@ function initCharts() {
   });
   G.charts['chart-altitude'].options.indexAxis = 'x';
   G.charts['chart-altitude'].update();
+  G.charts['chart-speed'].options.indexAxis = 'x';
+  G.charts['chart-speed'].update();
 }
 
 function updateChart(id, type, labels, data, bg, border) {
@@ -2223,13 +2450,13 @@ function switchTab(tab) {
 // ==========================================
 function startAutoRefresh() {
   stopAutoRefresh();
-  G.countdown = REFRESH_SEC;
+  G.countdown = G.refreshSec || REFRESH_SEC;
   G.countdownTimer = setInterval(() => {
     G.countdown--;
     const cdEl = document.getElementById('countdown');
     if (cdEl) cdEl.textContent = G.countdown + 's';
     if (G.countdown <= 0) {
-      G.countdown = REFRESH_SEC;
+      G.countdown = G.refreshSec || REFRESH_SEC;
       fetchAll();
     } else if (G.flights.length) {
       // Simulate smooth movement between API fetches
@@ -2246,9 +2473,9 @@ function stopAutoRefresh() {
 }
 
 function doRefresh() {
-  G.countdown = REFRESH_SEC;
+  G.countdown = G.refreshSec || REFRESH_SEC;
   const cdEl = document.getElementById('countdown');
-  if (cdEl) cdEl.textContent = REFRESH_SEC + 's';
+  if (cdEl) cdEl.textContent = (G.refreshSec || REFRESH_SEC) + 's';
   fetchAll();
   const btn = document.getElementById('btn-refresh');
   if (btn) {
@@ -2467,6 +2694,8 @@ function wireMapControls() {
     this.style.color = G.trailsOn ? 'var(--accent)' : '';
     updateMapDisplay();
   });
+  // Heatmap / Route density
+  document.getElementById('mc-heatmode')?.addEventListener('click', toggleHeatmap);
 }
 
 function wireNavbar() {
@@ -2533,12 +2762,360 @@ function wireNavbar() {
       case 'b': case 'B': toggleSidebar(); break;
       case 'e': case 'E': exportCSV(); break;
       case '?': document.getElementById('shortcuts-modal').classList.add('open'); break;
+      case ',': document.getElementById('settings-modal').classList.add('open'); break;
+      case 'a': case 'A': document.getElementById('about-modal').classList.add('open'); break;
     }
+  });
+  // About
+  document.getElementById('btn-about')?.addEventListener('click', () => {
+    document.getElementById('about-modal').classList.add('open');
+  });
+  document.getElementById('about-modal')?.addEventListener('click', function(e) {
+    if (e.target === this) this.classList.remove('open');
   });
 }
 
 function toggleSidebar() {
   document.getElementById('sidebar').classList.toggle('collapsed');
+}
+
+// ==========================================
+// SETTINGS
+// ==========================================
+const TILE_LAYERS = {
+  dark: { url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', subdomains: 'abcd' },
+  satellite: { url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', subdomains: 'abcd' },
+  streets: { url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', subdomains: 'abc' },
+  // Stadia Maps terrain tiles (free for non-commercial use; may require API key for production)
+  terrain: { url: 'https://tiles.stadiamaps.com/tiles/stamen_terrain/{z}/{x}/{y}{r}.png', subdomains: 'abcd' },
+};
+
+let currentTileLayer = null;
+let settingsAutoEnrich = true;
+let settingsShowProj = true;
+
+function loadSettings() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('aerotrack-settings') || '{}');
+    if (saved.refreshSec) {
+      const sel = document.getElementById('set-refresh');
+      if (sel) sel.value = saved.refreshSec;
+      G.refreshSec = parseInt(saved.refreshSec) || REFRESH_SEC;
+    }
+    if (saved.units) {
+      const sel = document.getElementById('set-units');
+      if (sel) sel.value = saved.units;
+      G.units = saved.units;
+    }
+    if (saved.theme) {
+      const sel = document.getElementById('set-theme');
+      if (sel) sel.value = saved.theme;
+      if (saved.theme === 'light') document.documentElement.classList.add('light');
+    }
+    if (saved.mapStyle) {
+      const sel = document.getElementById('set-map-style');
+      if (sel) sel.value = saved.mapStyle;
+    }
+    if (saved.trails === false) {
+      G.trailsOn = false;
+      const cb = document.getElementById('set-trails');
+      if (cb) cb.checked = false;
+    }
+    if (saved.proj === false) {
+      settingsShowProj = false;
+      const cb = document.getElementById('set-proj');
+      if (cb) cb.checked = false;
+    }
+    if (saved.cluster === false) {
+      G.clusterOn = false;
+      const cb = document.getElementById('set-cluster');
+      if (cb) cb.checked = false;
+    }
+    if (saved.enrich === false) {
+      settingsAutoEnrich = false;
+      const cb = document.getElementById('set-enrich');
+      if (cb) cb.checked = false;
+    }
+  } catch(e) { console.warn('loadSettings:', e); }
+}
+
+function saveSettings() {
+  try {
+    localStorage.setItem('aerotrack-settings', JSON.stringify({
+      refreshSec: document.getElementById('set-refresh')?.value || '15',
+      units: document.getElementById('set-units')?.value || 'aviation',
+      theme: document.getElementById('set-theme')?.value || 'dark',
+      mapStyle: document.getElementById('set-map-style')?.value || 'dark',
+      trails: document.getElementById('set-trails')?.checked ?? true,
+      proj: document.getElementById('set-proj')?.checked ?? true,
+      cluster: document.getElementById('set-cluster')?.checked ?? true,
+      enrich: document.getElementById('set-enrich')?.checked ?? true,
+    }));
+  } catch(e) { console.warn('saveSettings:', e); }
+}
+
+function wireSettings() {
+  document.getElementById('btn-settings')?.addEventListener('click', () => {
+    document.getElementById('settings-modal').classList.add('open');
+  });
+
+  document.getElementById('settings-modal')?.addEventListener('click', function(e) {
+    if (e.target === this) this.classList.remove('open');
+  });
+
+  document.getElementById('set-refresh')?.addEventListener('change', function() {
+    const newSec = parseInt(this.value);
+    G.refreshSec = newSec;
+    if (G.autoRefresh) { stopAutoRefresh(); startAutoRefresh(); }
+    saveSettings();
+    toast('Refresh interval: ' + newSec + 's', 'info', 2000);
+  });
+
+  document.getElementById('set-units')?.addEventListener('change', function() {
+    G.units = this.value;
+    saveSettings();
+    applyFilters();
+    toast('Units: ' + this.value, 'info', 2000);
+  });
+
+  document.getElementById('set-theme')?.addEventListener('change', function() {
+    if (this.value === 'light') {
+      document.documentElement.classList.add('light');
+    } else {
+      document.documentElement.classList.remove('light');
+    }
+    saveSettings();
+  });
+
+  document.getElementById('set-map-style')?.addEventListener('change', function() {
+    changeMapTiles(this.value);
+    saveSettings();
+  });
+
+  document.getElementById('set-trails')?.addEventListener('change', function() {
+    G.trailsOn = this.checked;
+    const mc = document.getElementById('mc-trails');
+    if (mc) { mc.classList.toggle('active', G.trailsOn); mc.style.color = G.trailsOn ? 'var(--accent)' : ''; }
+    updateMapDisplay();
+    saveSettings();
+  });
+
+  document.getElementById('set-proj')?.addEventListener('change', function() {
+    settingsShowProj = this.checked;
+    if (!settingsShowProj) {
+      Object.keys(G.projLines).forEach(id => {
+        G.map.removeLayer(G.projLines[id]);
+        delete G.projLines[id];
+      });
+    }
+    updateMapDisplay();
+    saveSettings();
+  });
+
+  document.getElementById('set-cluster')?.addEventListener('change', function() {
+    G.clusterOn = this.checked;
+    const mc = document.getElementById('mc-cluster');
+    if (mc) mc.classList.toggle('active', G.clusterOn);
+    if (G.clusterOn) {
+      G.map.removeLayer(G.freeLayer);
+      G.map.addLayer(G.cluster);
+    } else {
+      G.map.removeLayer(G.cluster);
+      G.map.addLayer(G.freeLayer);
+    }
+    G.markers = {};
+    updateMapDisplay();
+    saveSettings();
+  });
+
+  document.getElementById('set-enrich')?.addEventListener('change', function() {
+    settingsAutoEnrich = this.checked;
+    saveSettings();
+  });
+}
+
+function changeMapTiles(style) {
+  const layer = TILE_LAYERS[style] || TILE_LAYERS.dark;
+  if (currentTileLayer) G.map.removeLayer(currentTileLayer);
+  currentTileLayer = L.tileLayer(layer.url, { maxZoom: 19, subdomains: layer.subdomains }).addTo(G.map);
+}
+
+// ==========================================
+// BOOKMARKS / WATCH LIST
+// ==========================================
+function loadBookmarks() {
+  try {
+    return JSON.parse(localStorage.getItem('aerotrack-bookmarks') || '[]');
+  } catch(e) { return []; }
+}
+
+function saveBookmarks(bookmarks) {
+  try {
+    localStorage.setItem('aerotrack-bookmarks', JSON.stringify(bookmarks));
+  } catch(e) {}
+}
+
+function toggleBookmark(callsign) {
+  if (!callsign) return;
+  let bookmarks = loadBookmarks();
+  const idx = bookmarks.indexOf(callsign);
+  if (idx >= 0) {
+    bookmarks.splice(idx, 1);
+    toast(`Removed ${callsign} from watch list`, 'info', 2000);
+  } else {
+    bookmarks.push(callsign);
+    toast(`Added ${callsign} to watch list`, 'success', 2000);
+  }
+  saveBookmarks(bookmarks);
+  renderBookmarksBar();
+  const bmBtn = document.getElementById('dp-bookmark-btn');
+  if (bmBtn) bmBtn.classList.toggle('bookmarked', bookmarks.includes(callsign));
+}
+
+function renderBookmarksBar() {
+  const panel = document.getElementById('bookmarks-panel');
+  if (!panel) return;
+  const bookmarks = loadBookmarks();
+  if (!bookmarks.length) {
+    panel.classList.remove('has-bookmarks');
+    return;
+  }
+  panel.classList.add('has-bookmarks');
+  panel.innerHTML = `<div style="font-family:var(--mono);font-size:9px;letter-spacing:0.1em;color:var(--text3);margin-bottom:4px">★ WATCH LIST</div>` +
+    bookmarks.map(cs => {
+      const f = G.flights.find(x => x._callsign.trim() === cs);
+      const statusDot = f ? (f._isGround ? '⬤' : '✈') : '○';
+      return `<span class="bookmark-chip" onclick="jumpToBookmark('${cs}')">${statusDot} ${cs}<span class="remove-bm" onclick="event.stopPropagation();toggleBookmark('${cs}')">✕</span></span>`;
+    }).join('');
+}
+
+function jumpToBookmark(callsign) {
+  const f = G.flights.find(x => x._callsign.trim() === callsign);
+  if (f) {
+    switchTab('map');
+    selectFlight(f._id);
+  } else {
+    toast(`${callsign} not currently tracked`, 'warning', 2000);
+  }
+}
+
+// ==========================================
+// SHARE FLIGHT
+// ==========================================
+function shareFlight(callsign) {
+  const url = window.location.origin + window.location.pathname + '?flight=' + encodeURIComponent(callsign);
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(url).then(() => {
+      toast('Flight link copied to clipboard!', 'success', 2500);
+    }).catch(() => {
+      toast('Could not copy link', 'warning', 2000);
+    });
+  } else {
+    // Fallback for older browsers without Clipboard API
+    const ta = document.createElement('textarea');
+    ta.value = url;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy'); // eslint-disable-line no-deprecated
+    document.body.removeChild(ta);
+    toast('Flight link copied!', 'success', 2500);
+  }
+}
+
+function checkUrlFlight() {
+  const params = new URLSearchParams(window.location.search);
+  const flightParam = params.get('flight');
+  if (flightParam) {
+    // Wait for initial data fetch to complete before looking up the shared flight
+    const SHARED_FLIGHT_LOAD_DELAY = 3000;
+    setTimeout(() => {
+      const f = G.flights.find(x => x._callsign.trim() === flightParam);
+      if (f) {
+        selectFlight(f._id);
+        toast(`Loaded shared flight: ${flightParam}`, 'info', 3000);
+      } else {
+        toast(`Flight ${flightParam} not currently tracked`, 'warning', 3000);
+      }
+    }, SHARED_FLIGHT_LOAD_DELAY);
+  }
+}
+
+// ==========================================
+// EMERGENCY ALERTS
+// ==========================================
+function checkEmergencySquawks() {
+  const emergencyCodes = Object.keys(SQUAWK_CODES).filter(c => ['7500','7600','7700'].includes(c));
+  const emergencyFlights = G.flights.filter(f => emergencyCodes.includes(f._squawk));
+  const banner = document.getElementById('emergency-banner');
+  if (!banner) return;
+  
+  if (emergencyFlights.length === 0) {
+    banner.classList.remove('visible');
+    return;
+  }
+  
+  banner.classList.add('visible');
+  banner.innerHTML = '🚨 EMERGENCY: ' + emergencyFlights.map(f => {
+    const sq = SQUAWK_CODES[f._squawk];
+    return `<span class="emergency-item" onclick="selectFlight('${f._id}')">${sq?.icon || '⚠'} ${f._callsign} — ${sq?.text || 'SQUAWK ' + f._squawk}</span>`;
+  }).join(' | ');
+}
+
+// ==========================================
+// ROUTE DENSITY / HEATMAP MODE
+// ==========================================
+let heatmapOn = false;
+let heatCircles = [];
+
+function toggleHeatmap() {
+  heatmapOn = !heatmapOn;
+  const btn = document.getElementById('mc-heatmode');
+  if (btn) btn.classList.toggle('active', heatmapOn);
+  
+  if (heatmapOn) {
+    renderHeatmap();
+    toast('Route density view ON', 'info', 2000);
+  } else {
+    clearHeatmap();
+    toast('Route density view OFF', 'info', 2000);
+  }
+}
+
+function renderHeatmap() {
+  clearHeatmap();
+  const gridSize = 2;
+  const density = {};
+  G.filtered.forEach(f => {
+    if (!f._lat || !f._lng) return;
+    const key = `${Math.floor(f._lat/gridSize)*gridSize},${Math.floor(f._lng/gridSize)*gridSize}`;
+    density[key] = (density[key] || 0) + 1;
+  });
+  
+  const maxDensity = Math.max(...Object.values(density), 1);
+  
+  const DENSITY_COLORS = { high: '#ff1744', medium: '#ffab00', low: '#00c8ff', minimal: '#1a2f4a' };
+  const BASE_RADIUS = 30000; // meters
+  const MAX_EXTRA_RADIUS = 120000; // meters
+
+  Object.entries(density).forEach(([key, count]) => {
+    const [lat, lng] = key.split(',').map(Number);
+    const intensity = count / maxDensity;
+    const radius = BASE_RADIUS + intensity * MAX_EXTRA_RADIUS;
+    const color = intensity > 0.7 ? DENSITY_COLORS.high : intensity > 0.4 ? DENSITY_COLORS.medium : intensity > 0.2 ? DENSITY_COLORS.low : DENSITY_COLORS.minimal;
+    const circle = L.circle([lat + gridSize/2, lng + gridSize/2], {
+      radius,
+      color: 'transparent',
+      fillColor: color,
+      fillOpacity: 0.15 + intensity * 0.25,
+      interactive: false
+    }).addTo(G.map);
+    heatCircles.push(circle);
+  });
+}
+
+function clearHeatmap() {
+  heatCircles.forEach(c => G.map.removeLayer(c));
+  heatCircles = [];
 }
 
 // ==========================================
@@ -2577,6 +3154,8 @@ async function init() {
   wireFilters();
   wireMapControls();
   wireNavbar();
+  wireSettings();
+  loadSettings();
   startClock();
   
   // Fetch real data
@@ -2586,6 +3165,7 @@ async function init() {
   startAutoRefresh();
   
   toast('AeroTrack Live — tracking the skies', 'success', 3500);
+  checkUrlFlight();
 }
 
 // Expose globals for inline handlers
@@ -2594,6 +3174,9 @@ window.selectSearchResult = selectSearchResult;
 window.closeDetailPanel = closeDetailPanel;
 window.toggleFollow = toggleFollow;
 window.toggleSidebar = toggleSidebar;
+window.toggleBookmark = toggleBookmark;
+window.jumpToBookmark = jumpToBookmark;
+window.shareFlight = shareFlight;
 
 window.addEventListener('DOMContentLoaded', init);
 </script>
