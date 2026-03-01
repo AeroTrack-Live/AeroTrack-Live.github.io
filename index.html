@@ -332,6 +332,25 @@ tbody td{padding:7px 12px;font-size:12px}
 @keyframes emergency-flash{0%,100%{background:rgba(255,23,68,.08)}50%{background:rgba(255,23,68,.18)}}
 .emergency-item{display:inline-flex;align-items:center;gap:4px;margin:0 8px;cursor:pointer}
 .emergency-item:hover{text-decoration:underline}
+/* About modal */
+#about-modal{position:fixed;inset:0;z-index:99998;display:none;align-items:center;justify-content:center;background:rgba(4,8,15,.85);backdrop-filter:blur(4px)}
+#about-modal.open{display:flex}
+.about-box{background:var(--card);border:1px solid var(--border2);border-radius:12px;padding:28px;width:400px;max-height:80vh;overflow-y:auto;text-align:center}
+.about-logo{width:56px;height:56px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--accent),var(--purple));border-radius:14px;margin:0 auto 14px}
+.about-logo svg{fill:#fff;width:28px;height:28px}
+.about-title{font-family:var(--cond);font-weight:800;font-size:22px;letter-spacing:0.1em;background:linear-gradient(135deg,var(--accent),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.about-version{font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:2px;letter-spacing:0.1em}
+.about-desc{font-size:13px;color:var(--text2);margin:14px 0;line-height:1.6}
+.about-credits{font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:14px;line-height:1.8}
+.about-credits a{color:var(--accent);text-decoration:none}
+.about-credits a:hover{text-decoration:underline}
+/* Empty state */
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 24px;color:var(--text3);text-align:center}
+.empty-state-icon{font-size:48px;margin-bottom:16px;opacity:.5}
+.empty-state-title{font-family:var(--cond);font-size:18px;font-weight:700;color:var(--text2);margin-bottom:8px}
+.empty-state-desc{font-size:12px;max-width:280px;line-height:1.5}
+.empty-state-btn{margin-top:16px;padding:8px 20px;border-radius:6px;background:rgba(0,200,255,.1);border:1px solid rgba(0,200,255,.25);color:var(--accent);font-family:var(--sans);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s}
+.empty-state-btn:hover{background:rgba(0,200,255,.2)}
 /* AviationStack key */
 /* ⚠️ Replace with your own key from aviationstack.com (free tier works) */
 /* ⚠️ OpenSky Network is used as primary (free, no auth) */
@@ -348,9 +367,28 @@ tbody td{padding:7px 12px;font-size:12px}
   #search-wrap{max-width:200px}
   .stats-grid{grid-template-columns:1fr 1fr}
 }
+/* Print */
+@media print{
+  #topbar,#tabbar,#sidebar,#detail-panel,.map-controls,#map-bottom-controls,#map-info-bar,#toast-stack,#loader,#shortcuts-modal,#settings-modal,#about-modal,#bookmarks-panel,#emergency-banner,.icon-btn,.fpill,.map-ctrl-btn{display:none !important}
+  html,body,#app,#workspace{height:auto !important;overflow:visible !important}
+  #view-map,#map-container,#map{height:500px !important;display:block !important}
+  #view-list{display:block !important;overflow:visible !important}
+  #view-stats{display:block !important;overflow:visible !important}
+  *{color:#000 !important;background:#fff !important;border-color:#ddd !important;box-shadow:none !important}
+  .stat-card-value{color:#333 !important}
+  .badge{border:1px solid #999 !important}
+  table{page-break-inside:auto}
+  tr{page-break-inside:avoid}
+  @page{margin:1cm}
+}
+/* Focus visible */
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:3px}
+button:focus-visible,.icon-btn:focus-visible,.tab-btn:focus-visible,.fpill:focus-visible,.map-ctrl-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 </style>
 </head>
 <body>
+
+<a href="#map" class="skip-link" style="position:absolute;top:-100px;left:0;padding:8px 16px;background:var(--accent);color:#fff;z-index:99999;font-family:var(--sans);font-size:13px;border-radius:0 0 6px 0;transition:top .2s;text-decoration:none" onfocus="this.style.top='0'" onblur="this.style.top='-100px'">Skip to map</a>
 
 <!-- LOADER -->
 <div id="loader">
@@ -372,7 +410,7 @@ tbody td{padding:7px 12px;font-size:12px}
 </div>
 
 <!-- APP -->
-<div id="app">
+<div id="app" role="application" aria-label="AeroTrack Live Flight Tracker">
 
   <!-- TOP BAR -->
   <div id="topbar">
@@ -419,6 +457,9 @@ tbody td{padding:7px 12px;font-size:12px}
       <button class="icon-btn" id="btn-settings" title="Settings" aria-label="Settings">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
       </button>
+      <button class="icon-btn" id="btn-about" title="About AeroTrack" aria-label="About">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+      </button>
       <div id="total-pill" style="background:var(--card);border:1px solid var(--border);border-radius:4px;padding:3px 9px;font-family:var(--mono);font-size:11px;color:var(--text2)">
         <span id="total-num" style="color:var(--accent)">0</span> flights
       </div>
@@ -463,10 +504,10 @@ tbody td{padding:7px 12px;font-size:12px}
   <div id="emergency-banner"></div>
 
   <!-- WORKSPACE -->
-  <div id="workspace">
+  <div id="workspace" role="main">
 
     <!-- SIDEBAR -->
-    <div id="sidebar">
+    <div id="sidebar" role="complementary" aria-label="Filters">
       <div class="sidebar-section">
         <div class="sidebar-label">FILTERS</div>
         <div id="sb-stats">
@@ -617,8 +658,13 @@ tbody td{padding:7px 12px;font-size:12px}
           </thead>
           <tbody id="list-body"></tbody>
         </table>
-        <div id="list-empty" style="display:none;text-align:center;padding:48px;font-family:var(--mono);font-size:12px;color:var(--text3)">
-          No flights match current filters
+        <div id="list-empty" style="display:none">
+          <div class="empty-state">
+            <div class="empty-state-icon">✈</div>
+            <div class="empty-state-title">No flights found</div>
+            <div class="empty-state-desc">No flights match your current filters. Try adjusting your search criteria or reset all filters.</div>
+            <button class="empty-state-btn" onclick="document.getElementById('sb-reset').click()">Reset Filters</button>
+          </div>
         </div>
       </div>
     </div>
@@ -656,6 +702,7 @@ tbody td{padding:7px 12px;font-size:12px}
     <div class="shortcut-row"><span>Toggle sidebar</span><kbd class="shortcut-key">B</kbd></div>
     <div class="shortcut-row"><span>Export CSV</span><kbd class="shortcut-key">E</kbd></div>
     <div class="shortcut-row"><span>Settings</span><kbd class="shortcut-key">,</kbd></div>
+    <div class="shortcut-row"><span>About</span><kbd class="shortcut-key">A</kbd></div>
     <div class="shortcut-row" style="border-bottom:none"><span>This help</span><kbd class="shortcut-key">?</kbd></div>
     <button onclick="document.getElementById('shortcuts-modal').classList.remove('open')" style="margin-top:16px;width:100%;padding:8px;border-radius:6px;background:var(--surface);border:1px solid var(--border);color:var(--text2);font-family:var(--sans);font-size:13px;cursor:pointer">Close</button>
   </div>
@@ -728,6 +775,31 @@ tbody td{padding:7px 12px;font-size:12px}
       </div>
     </div>
     <button onclick="document.getElementById('settings-modal').classList.remove('open')" style="margin-top:8px;width:100%;padding:8px;border-radius:6px;background:var(--surface);border:1px solid var(--border);color:var(--text2);font-family:var(--sans);font-size:13px;cursor:pointer">Done</button>
+  </div>
+</div>
+<!-- About modal -->
+<div id="about-modal">
+  <div class="about-box fade-up">
+    <div class="about-logo">
+      <svg viewBox="0 0 24 24"><path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg>
+    </div>
+    <div class="about-title">AEROTRACK LIVE</div>
+    <div class="about-version">v2.0.0 — GLOBAL FLIGHT TRACKER</div>
+    <div class="about-desc">
+      Real-time global flight tracking powered by ADS-B data. Monitor thousands of aircraft worldwide with live positions, telemetry, and flight information.
+    </div>
+    <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:12px 0">
+      <span class="badge badge-active">Real-Time Tracking</span>
+      <span class="badge badge-scheduled">Global Coverage</span>
+      <span class="badge badge-active">ADS-B Data</span>
+    </div>
+    <div class="about-credits">
+      Data: <a href="https://opensky-network.org" target="_blank" rel="noopener">OpenSky Network</a> · <a href="https://aviationstack.com" target="_blank" rel="noopener">AviationStack</a><br/>
+      Maps: <a href="https://leafletjs.com" target="_blank" rel="noopener">Leaflet</a> · <a href="https://carto.com" target="_blank" rel="noopener">CartoDB</a><br/>
+      Charts: <a href="https://www.chartjs.org" target="_blank" rel="noopener">Chart.js</a><br/><br/>
+      Built with ❤️ for aviation enthusiasts
+    </div>
+    <button onclick="document.getElementById('about-modal').classList.remove('open')" style="margin-top:18px;width:100%;padding:8px;border-radius:6px;background:var(--surface);border:1px solid var(--border);color:var(--text2);font-family:var(--sans);font-size:13px;cursor:pointer">Close</button>
   </div>
 </div>
 <!-- Toast stack -->
@@ -1732,9 +1804,10 @@ function updateMapDisplay() {
 function buildPopup(f) {
   const color = statusColor(f);
   const si = statusInfo(f);
-  const altStr = f._altFt > 0 ? f._altFt.toLocaleString() + ' ft (FL' + Math.round(f._altFt/100) + ')' : 'Ground';
+  const units = G.units || 'aviation';
+  const altStr = f._altFt > 0 ? (units === 'metric' ? Math.round(f._altFt * 0.3048).toLocaleString() + ' m' : f._altFt.toLocaleString() + ' ft (FL' + Math.round(f._altFt/100) + ')') : 'Ground';
   const kts = f._speedKts || Math.round(f._speedKmh * 0.539957);
-  const spdStr = f._speedKmh > 0 ? kts + ' kts' : '--';
+  const spdStr = f._speedKmh > 0 ? (units === 'metric' ? f._speedKmh + ' km/h' : units === 'imperial' ? Math.round(f._speedKmh * 0.621371) + ' mph' : kts + ' kts') : '--';
   const vsign = f._vRateFpm > 100 ? '▲' : f._vRateFpm < -100 ? '▼' : '—';
   const vsColor = f._vRateFpm > 100 ? '#00e676' : f._vRateFpm < -100 ? '#ff7043' : '#4a6882';
   const sqInfo = SQUAWK_CODES[f._squawk] || null;
@@ -2610,6 +2683,8 @@ function wireMapControls() {
     this.style.color = G.trailsOn ? 'var(--accent)' : '';
     updateMapDisplay();
   });
+  // Heatmap / Route density
+  document.getElementById('mc-heatmode')?.addEventListener('click', toggleHeatmap);
 }
 
 function wireNavbar() {
@@ -2677,7 +2752,15 @@ function wireNavbar() {
       case 'e': case 'E': exportCSV(); break;
       case '?': document.getElementById('shortcuts-modal').classList.add('open'); break;
       case ',': document.getElementById('settings-modal').classList.add('open'); break;
+      case 'a': case 'A': document.getElementById('about-modal').classList.add('open'); break;
     }
+  });
+  // About
+  document.getElementById('btn-about')?.addEventListener('click', () => {
+    document.getElementById('about-modal').classList.add('open');
+  });
+  document.getElementById('about-modal')?.addEventListener('click', function(e) {
+    if (e.target === this) this.classList.remove('open');
   });
 }
 
@@ -2962,6 +3045,59 @@ function checkEmergencySquawks() {
     const sq = SQUAWK_CODES[f._squawk];
     return `<span class="emergency-item" onclick="selectFlight('${f._id}')">${sq?.icon || '⚠'} ${f._callsign} — ${sq?.text || 'SQUAWK ' + f._squawk}</span>`;
   }).join(' | ');
+}
+
+// ==========================================
+// ROUTE DENSITY / HEATMAP MODE
+// ==========================================
+let heatmapOn = false;
+let heatCircles = [];
+
+function toggleHeatmap() {
+  heatmapOn = !heatmapOn;
+  const btn = document.getElementById('mc-heatmode');
+  if (btn) btn.classList.toggle('active', heatmapOn);
+  
+  if (heatmapOn) {
+    renderHeatmap();
+    toast('Route density view ON', 'info', 2000);
+  } else {
+    clearHeatmap();
+    toast('Route density view OFF', 'info', 2000);
+  }
+}
+
+function renderHeatmap() {
+  clearHeatmap();
+  const gridSize = 2;
+  const density = {};
+  G.filtered.forEach(f => {
+    if (!f._lat || !f._lng) return;
+    const key = `${Math.floor(f._lat/gridSize)*gridSize},${Math.floor(f._lng/gridSize)*gridSize}`;
+    density[key] = (density[key] || 0) + 1;
+  });
+  
+  const maxDensity = Math.max(...Object.values(density), 1);
+  
+  Object.entries(density).forEach(([key, count]) => {
+    const [lat, lng] = key.split(',').map(Number);
+    const intensity = count / maxDensity;
+    const radius = 30000 + intensity * 120000;
+    const color = intensity > 0.7 ? '#ff1744' : intensity > 0.4 ? '#ffab00' : intensity > 0.2 ? '#00c8ff' : '#1a2f4a';
+    const circle = L.circle([lat + gridSize/2, lng + gridSize/2], {
+      radius,
+      color: 'transparent',
+      fillColor: color,
+      fillOpacity: 0.15 + intensity * 0.25,
+      interactive: false
+    }).addTo(G.map);
+    heatCircles.push(circle);
+  });
+}
+
+function clearHeatmap() {
+  heatCircles.forEach(c => G.map.removeLayer(c));
+  heatCircles = [];
 }
 
 // ==========================================
